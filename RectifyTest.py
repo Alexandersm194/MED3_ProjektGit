@@ -9,7 +9,7 @@ finalWidth = 600
 finalHeight = 600
 
 #initialize lowest x and y value for corners
-xMin, xMax, yMin, yMax = 1000, 0, 1000, 0
+# xMin, xMax, yMin, yMax = 1000, 0, 1000, 0
 
 #draw cicles at coordinates
 # cv.circle(chessIMG, tl, 5, (0,0,255), 2)
@@ -22,27 +22,30 @@ xMin, xMax, yMin, yMax = 1000, 0, 1000, 0
 corners = cv.goodFeaturesToTrack(chessIMGGray, 100, 0.12, 10)
 corners = np.intp(corners)
 
+#select coordinates
+pointX, pointY = 500, 500
+tl = (pointX, pointY)
+bl = (pointX, pointY)
+tr = (pointX, pointY)
+br = (pointX, pointY)
+
+
 for corner in corners:
     x, y = corner.ravel() #ravel flattens the array
-    if x < xMin:
-        xMin = x
-    if x > xMax:
-        xMax = x
-    if y < yMin:
-        yMin = y
-    if y > yMax:
-        yMax = y
+    if x < pointX:
+        pointX = x
+        bl = (x, y)
+    # if x > xMax:
+    #     xMax = x
+    # if y < yMin:
+    #     yMin = y
+    # if y > yMax:
+    #     yMax = y
     cv.circle(chessIMG, (x, y), 5, (0,0,255), 0)
     # print(x, y)
 
-print(xMin, xMax, yMin, yMax)
-
-
-#select coordinates
-tl = (540, 95)
-bl = (165, 455)
-tr = (1113, 265)
-br = (825, 715)
+# print(xMin, xMax, yMin, yMax)
+print(bl)
 
 
 #apply transformation
