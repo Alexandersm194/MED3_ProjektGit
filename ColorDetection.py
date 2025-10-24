@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
-img = cv.imread("TrainingImages/Fisk.jpg")
+img = cv.imread("FishImages/fish4/fish4_6.jpg")
 
 #///////////////FIRST TRY//////////////////////
 '''hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
