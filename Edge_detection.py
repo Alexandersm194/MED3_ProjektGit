@@ -1,8 +1,9 @@
+import cv2
 import numpy as np
 import cv2 as cv
 
 
-original = cv.imread("TrainingImages//skråFisk.jpg")
+original = cv.imread("TrainingImages//Fisk.jpg")
 
 alpha = 2
 beta = -50
@@ -13,7 +14,7 @@ contrastBrightness = cv.convertScaleAbs(original, alpha=alpha, beta=beta)
 thresholded = cv.threshold(contrastBrightness, 125, 255, cv.THRESH_BINARY)[1]
 
 grayImage = cv.cvtColor(thresholded, cv.COLOR_BGR2GRAY)
-
+cv2.imshow("grey", grayImage)
 #sobelx = cv.Sobel(original, cv.CV_64F, 1, 0, ksize=3)
 #sobely = cv.Sobel(original, cv.CV_64F, 0, 1, ksize=3)
 #laplacian = cv.Laplacian(original,cv.CV_64F)
@@ -37,6 +38,7 @@ openImage = opening(grayImage, kernel)
 closingImage = closing(grayImage, kernel)
 
 openClose = closing(openImage, kernel)
+
 #closeOpen = opening(closingImage, kernel)
 
 thresh = cv.threshold(openClose, 250, 255, cv.THRESH_BINARY)[1]
