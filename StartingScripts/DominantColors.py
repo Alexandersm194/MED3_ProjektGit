@@ -15,11 +15,11 @@ height, width, _ = np.shape(img)
 data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
 data = np.float32(data) #convert to float
 
-clusterAmount = 4
+clusterAmount = 6
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 15, 2.0) #maximum iterations and desired accuracy for criteria
 flags = cv.KMEANS_PP_CENTERS
 compactness, labels, centers = cv.kmeans(data, clusterAmount, None, criteria, 10, flags=flags)
-print(centers)
+# print(centers)
 
 font = cv.FONT_HERSHEY_SIMPLEX
 bars = []
