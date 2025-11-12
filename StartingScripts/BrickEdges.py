@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-inputImg = cv2.imread("TrainingImages/Fisk.jpg")
+inputImg = cv2.imread("C:/Users/magnu/PycharmProjects/MED3_ProjektGit/TrainingImages/Fisk.jpg")
 cv2.imshow("org", inputImg)
 
 blur = cv2.blur(inputImg,(23, 23))
