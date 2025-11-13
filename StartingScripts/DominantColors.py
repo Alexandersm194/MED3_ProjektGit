@@ -32,8 +32,6 @@ for index, row in enumerate(centers):
     bars.append(bar)
     rgbValues.append(rgb)
 
-#could try to merge colors with similar rgb values
-#if rgbValues[i] > rgbValues[0]+30 or rgbValues[i] < rgbValues[0]-30
 imgBar = np.hstack(bars)
 
 for index, row in enumerate(rgbValues):
