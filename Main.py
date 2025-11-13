@@ -3,6 +3,7 @@ import numpy as np
 import ModelDirection as MD
 import Matrix
 import Segmentation
+import json
 
 img = cv.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
 imgOrg = img.copy()
@@ -41,12 +42,56 @@ cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHight, brickWidth, dotHight)
 
 #Feature Extraction And Classification
-for y, row in enumerate(brick_matrix):
+'''for y, row in enumerate(brick_matrix):
     for x, col in enumerate(row):
         print(col.shape)
         cv.imshow(f"{y},{x}", col)
         cv.waitKey(0)
-        cv.destroyAllWindows()
+        cv.destroyAllWindows()'''
+
+# Brick
+
+ColorMatrix = [
+    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+]
+
+final_brick_matrix = []
+for y, row in enumerate(ColorMatrix):
+    final_brick_matrix.append([])
+
+brick = {
+    "length": 0,
+    "color": ""
+}
+
+for y, row in enumerate(ColorMatrix):
+    curr_brick_color = row[0]
+    curr_brick_length = 1
+
+    for x in range(1, len(row)):
+        if row[x] == curr_brick_color:
+            curr_brick_length += 1
+        else:
+            new_brick = brick.copy()
+            new_brick["length"] = curr_brick_length
+            new_brick["color"] = curr_brick_color
+            final_brick_matrix[y].append(new_brick)
+            curr_brick_color = row[x]
+            curr_brick_length = 1
+
+    # 👇 Add the last brick after the loop
+    new_brick = brick.copy()
+    new_brick["length"] = curr_brick_length
+    new_brick["color"] = curr_brick_color
+    final_brick_matrix[y].append(new_brick)
+
+json_str = json.dumps(final_brick_matrix)
+with open("sample.json", "w") as f:
+    f.write(json_str)
 
 
 
