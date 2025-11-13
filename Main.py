@@ -5,7 +5,7 @@ import Matrix
 import Segmentation
 import json
 
-img = cv.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
+img = cv.imread("TrainingImages//Fisk.jpg")
 imgOrg = img.copy()
 
 #Pre-Processing
