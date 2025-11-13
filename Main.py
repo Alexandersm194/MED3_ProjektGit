@@ -4,6 +4,7 @@ import ModelDirection as MD
 import Matrix
 import Segmentation
 import json
+from DominantColors import DominantColorsFun
 
 img = cv.imread("TrainingImages//Fisk.jpg")
 imgOrg = img.copy()
@@ -40,6 +41,16 @@ cv.waitKey(0)
 
 #BrickMatrix
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHight, brickWidth, dotHight)
+
+colorMatrix = []
+for y, row in enumerate(brick_matrix):
+    rows = []
+    for x, col in enumerate(row):
+        rows.append(DominantColorsFun(col))
+    colorMatrix.append(rows)
+
+for y in range(len(colorMatrix)):
+    print(colorMatrix[y])
 
 #Feature Extraction And Classification
 '''for y, row in enumerate(brick_matrix):
