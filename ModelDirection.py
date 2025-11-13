@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-from cv2 import findContours
 
 
 def rotateImage(orgImg, angle):
@@ -149,7 +148,7 @@ def brickEdge(inputImg):
 
     cv2.waitKey(0)
     return lineThresh, edges
-def SVD(image):
+'''def SVD(image):
     height, width = image.shape[:2]
 
     ys, xs = np.nonzero(image)
@@ -187,7 +186,7 @@ def SVD(image):
     plt.imshow(upright_image, cmap='gray')
     plt.title("After correction (upright)")
 
-    plt.show()
+    plt.show()'''
 
 
 def dominant_angle_from_lines(image):
@@ -235,9 +234,9 @@ def dominant_angle_from_lines(image):
 
 
 
-input_image = cv2.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
-test_rotated = rotateImage(input_image, 130)
-test_rotate_edgedetected = rotateImage(edge(input_image), 130)
+'''input_image = cv2.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
+test_rotated = rotateImage(input_image, 0)
+test_rotate_edgedetected = rotateImage(brickEdge(input_image)[1], 0)
 #input_image = rotateImage(brickEdge(input_image)[1], 60)
 #input_image = rotateImage(blob(input_image)[1])
 angle = dominant_angle_from_lines(test_rotate_edgedetected)[1]
@@ -245,10 +244,37 @@ angle = dominant_angle_from_lines(test_rotate_edgedetected)[1]
 rotated = rotateImage(blob(test_rotated)[0], angle)
 
 
+
+
+
 cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
 cv2.imshow("rotated", rotated)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+contours, _ = cv2.findContours(rotated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+print(len(contours))
+
+crop = BoundingBox.find_bounding_box(rotated)
+
+cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
+cv2.imshow("rotated", crop)
+
+isUp, dotHight, brickHight, brickWidth = Matrix.find_up(crop)
+print(isUp)
+final_img = crop
+if not isUp:
+    final_img = rotateImage(crop, 180)
+
+cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
+cv2.imshow("rotated", final_img)
+cv2.waitKey(0)
+
+matrix = Matrix.matrix_slice(final_img, brickHight, brickWidth, dotHight)
+
+for y, row in enumerate(matrix):
+    for x, col in enumerate(row):
+        cv2.imshow(f"{y}, {x}", col)
+        cv2.waitKey(0)'''
 #SVD(edge(input_image))
 #SVD(input_image)
 
