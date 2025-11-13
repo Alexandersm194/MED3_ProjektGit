@@ -34,7 +34,7 @@ def find_bounding_box(input):
 
     crop = result[y:y + h, x:x + w]
 
-    return crop
+    return crop, x, y, w, h
 
     '''for i, cnt in enumerate(contours, start=0):
         x, y, w, h = cv2.boundingRect(cnt)

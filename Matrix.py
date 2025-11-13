@@ -2,7 +2,7 @@ import math
 
 import cv2 as cv
 import numpy as np
-import BoundingBox
+
 
 def find_up(crop):
     ref = cv.imread("back.JPG")
@@ -41,9 +41,8 @@ def find_up(crop):
         x, y, w, h = cv.boundingRect(contours[0])
         LegoBrickWidth = w
         LegoBrickHeight = h
-        print(w, h)
         # Since this is top-left corner, no offset needed
-        cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
+        #cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("No orange object found.")
 
@@ -51,6 +50,8 @@ def find_up(crop):
     print(LegoBrickDotHeight)
 
     LegoBrickCleanHeight = math.floor(LegoBrickHeight * 0.85)
+    print(LegoBrickCleanHeight)
+    print(LegoBrickWidth)
 
     top = 0
     bottom = 0
@@ -75,7 +76,8 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     final_matrix = []
 
     nrBricksHorizontal = img.shape[1] // brickWidth
-    nrBricksVertical = img.shape[0] // brickHeight
+    nrBricksVertical = (img.shape[0] - dotHeight) // brickHeight
+    print(f"nr of bricksVer: {nrBricksVertical}, nr of bricksHor: {nrBricksHorizontal}")
 
     for y in range(nrBricksVertical):
         row = []
@@ -86,7 +88,7 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
             end_x = (x + 1) * brickWidth
 
             # Crop brick, skipping top dot region if specified
-            brickImg = img[start_y + dotHeight:end_y, start_x:end_x]
+            brickImg = img[start_y + dotHeight:end_y + dotHeight, start_x:end_x]
 
             row.append(brickImg)
 
