@@ -26,10 +26,6 @@ def createBars(color):
     return bar
 
 bars = []
-# bars.append(createBars(color1()))
-# bars.append(createBars(color2()))
-# bars.append(createBars(color3()))
-
 
 #example matrix
 exampleMatrix = []
@@ -49,15 +45,21 @@ for i in range(2):
     for j in range(2):
         exampleMatrix[i][j] = color2()
 
-for i in range(rows):
-    # print(exampleMatrix[i])
-    row = []
-    for j in range(cols):
-        row.append(createBars(exampleMatrix[i][j]))
-    bars.append(np.hstack(row))
+exampleMatrix[0][2] = color1()
+exampleMatrix[0][3] = color1()
 
-image = np.concatenate(bars, axis=0)
+#visualize matrix
+def visualizeMatrix(matrix):
+    for i in range(rows):
+        # print(matrix[i])
+        row = []
+        for j in range(cols):
+            row.append(createBars(matrix[i][j]))
+        bars.append(np.hstack(row))
+    image = np.concatenate(bars, axis=0)
+    return image
 
+image = visualizeMatrix(exampleMatrix)
 
-cv.imshow('color1', image)
+cv.imshow('colors', image)
 cv.waitKey(0)
