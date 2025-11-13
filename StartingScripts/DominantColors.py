@@ -9,15 +9,16 @@ def createBars(height, width, color):
 
 img = cv.imread('C:/Users/pauls/PycharmProjects/MED3_ProjektGit/fishImages/fish1/fish1_1.jpg')
 img = cv.resize(img,(1008,756))
-img = img[270:500,220:800]
+img = img[270:500,220:800] #cropout of fish
+img = img[28:59,58:178] #cropout of block
 height, width, _ = np.shape(img)
 
 data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
 data = np.float32(data) #convert to float
 
-clusterAmount = 7
+clusterAmount = 3
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 15, 2.0) #maximum iterations and desired accuracy for criteria
-flags = cv.KMEANS_PP_CENTERS
+flags = cv.KMEANS_RANDOM_CENTERS #KMEANS_RANDOM/PP_CENTERS
 compactness, labels, centers = cv.kmeans(data, clusterAmount, None, criteria, 10, flags=flags)
 # print(centers)
 
@@ -26,7 +27,7 @@ bars = []
 rgbValues = []
 
 for index, row in enumerate(centers):
-    bar, rgb = createBars(200, 200, row)
+    bar, rgb = createBars(180, 180, row)
     bars.append(bar)
     rgbValues.append(rgb)
 
@@ -35,8 +36,10 @@ for index, row in enumerate(centers):
 imgBar = np.hstack(bars)
 
 for index, row in enumerate(rgbValues):
-    image = cv.putText(imgBar, f'RGB: {row}', (5 + 200 * index, 200 - 10), font, 0.5, (0, 0, 0), 1, cv.LINE_AA)
+    image = cv.putText(imgBar, f'RGB: {row}', (5 + 180 * index, 180 - 10), font, 0.5, (0, 0, 0), 1, cv.LINE_AA)
     # print(f'{index + 1}. RGB: {row}')
+
+print(min(rgbValues)) #find darkest color. takes care of highlights
 
 #Quantize image
 centers = np.uint8(centers)
