@@ -20,46 +20,49 @@ def color3():
     return color
 
 # #color visualization
-def createBars(color):
-    bar = np.zeros((200, 200, 3), np.uint8)
-    bar [:] = color
-    return bar
 
-bars = []
 
-#example matrix
-exampleMatrix = []
-rows = 3
-cols = 5
-for i in range(rows):
-    row = []
-    for j in range(cols):
-        row.append((0,0,0))
-    exampleMatrix.append(row)
-
-for i in range(rows):
-    for j in range(cols):
-        exampleMatrix[i][j] = color3()
-
-for i in range(2):
-    for j in range(2):
-        exampleMatrix[i][j] = color2()
-
-exampleMatrix[0][2] = color1()
-exampleMatrix[0][3] = color1()
+# #example matrix
+# exampleMatrix = []
+# rows = 3
+# cols = 5
+# for i in range(rows):
+#     row = []
+#     for j in range(cols):
+#         row.append((0,0,0))
+#     exampleMatrix.append(row)
+#
+# for i in range(rows):
+#     for j in range(cols):
+#         exampleMatrix[i][j] = color3()
+#
+# for i in range(2):
+#     for j in range(2):
+#         exampleMatrix[i][j] = color2()
+#
+# exampleMatrix[0][2] = color1()
+# exampleMatrix[0][3] = color1()
 
 #visualize matrix
 def visualizeMatrix(matrix):
-    for i in range(rows):
+    def createBars(color):
+        bar = np.zeros((100, 100, 3), np.uint8)
+        bar[:] = color
+        return bar
+
+    bars = []
+    for i in range(len(matrix)):
         # print(matrix[i])
         row = []
-        for j in range(cols):
+        for j in range(len(matrix[i])):
             row.append(createBars(matrix[i][j]))
         bars.append(np.hstack(row))
     image = np.concatenate(bars, axis=0)
+    cv.imshow('colors', image)
+    cv.waitKey(0)
     return image
 
-image = visualizeMatrix(exampleMatrix)
-
-cv.imshow('colors', image)
-cv.waitKey(0)
+# image = visualizeMatrix(exampleMatrix)
+#
+# cv.imshow('colors', image)
+# cv.waitKey(0)

@@ -5,6 +5,7 @@ import Matrix
 import Segmentation
 import json
 from DominantColors import DominantColorsFun
+from ColorProcessor import visualizeMatrix
 
 img = cv.imread("TrainingImages//Fisk.jpg")
 imgOrg = img.copy()
@@ -51,6 +52,8 @@ for y, row in enumerate(brick_matrix):
 
 for y in range(len(colorMatrix)):
     print(colorMatrix[y])
+
+visualizeMatrix(colorMatrix)
 
 #Feature Extraction And Classification
 '''for y, row in enumerate(brick_matrix):

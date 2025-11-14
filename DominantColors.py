@@ -11,7 +11,7 @@ def DominantColorsFun(img):
     def createBars(height, width, color):
         bar = np.zeros((height, width, 3), np.uint8)
         bar[:] = color
-        red, green, blue = int(color[2]), int(color[1]), int(color[0])  # correct from bgr to rgb
+        red, green, blue = int(color[0]), int(color[1]), int(color[2])  # correct from bgr to rgb (except rn it's still bgr)
         return bar, (red, green, blue)
 
     height, width, _ = np.shape(img)  # height and width required for calculating pixels
