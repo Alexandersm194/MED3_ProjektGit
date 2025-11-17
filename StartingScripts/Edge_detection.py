@@ -3,7 +3,7 @@ import numpy as np
 import cv2 as cv
 
 
-original = cv.imread("TrainingImages//Fisk.jpg")
+original = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\fishImages\fish1\CroppedFish.jpg")
 
 alpha = 2
 beta = -50
