@@ -29,7 +29,7 @@ cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
 cropped_org = rotated_org[y:y + h, x:x + w]
 
 #FindUp
-isUp, dotHight, brickHight, brickWidth = Matrix.find_up(cropped_bin)
+isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
 if not isUp:
@@ -41,7 +41,7 @@ cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
 #BrickMatrix
-brick_matrix = Matrix.matrix_slice(corrected_img, brickHight, brickWidth, dotHight)
+brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 
 colorMatrix = []
 for y, row in enumerate(brick_matrix):
