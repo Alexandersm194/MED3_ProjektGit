@@ -8,8 +8,6 @@ img = cv.resize(img_path, None, fx=0.25, fy=0.25)
 
 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-
-
 blur = cv.GaussianBlur(gray, (9, 9), 0)
 _, thresh = cv.threshold(blur, 160, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
 kernel = np.ones((11, 11), np.uint8)
@@ -29,11 +27,9 @@ c = max(cnts, key=cv.contourArea)
 
 x, y, w, h = cv.boundingRect(c)
 
-crop = gray[y:y+h, x:x+w].copy()
+crop = img[y:y+h, x:x+w].copy()
 
 cv.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-
 
 cv.imshow('img', img)
 cv.imshow('crop', crop)
