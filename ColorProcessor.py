@@ -87,7 +87,7 @@ def connectColors(matrix):
                     bgr =  [False, False, False]
         # print(matrix[i])
     image = visualizeMatrix(matrix)
-    return image
+    return matrix
 
 
 # image = visualizeMatrix(exampleMatrix)
