@@ -51,6 +51,7 @@ cv.waitKey(0)
 
 #BrickMatrix
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
+blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
 
 colorMatrix = []
 for y, row in enumerate(brick_matrix):
@@ -74,7 +75,21 @@ print(len(brick_matrix))
         cv.waitKey(0)
         cv.destroyAllWindows()'''
 
+SomethingMatrix = []
 # Brick
+for y, row in enumerate(blob_brick_matrix):
+    newRow = []
+    for x, col in enumerate(row):
+        midY = col.shape[0] // 2
+        midX = col.shape[1] // 2
+        if col[midY][midX] == 0:
+            newRow.append("empty")
+        else:
+            newRow.append("Something")
+    SomethingMatrix.append(newRow)
+
+print(SomethingMatrix)
+
 
 ColorMatrix = [
     ["empty", "empty" , "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty"],
