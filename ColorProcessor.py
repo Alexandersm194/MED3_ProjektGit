@@ -52,7 +52,7 @@ def visualizeMatrix(matrix):
 
     bars = []
     for i in range(len(matrix)):
-        print(matrix[i])
+        # print(matrix[i])
         row = []
         for j in range(len(matrix[i])):
             row.append(createBars(matrix[i][j]))
@@ -85,7 +85,7 @@ def connectColors(matrix):
                     # print("same color")
                     matrix[i][k] = matrix[i][j]
                     bgr =  [False, False, False]
-        print(matrix[i])
+        # print(matrix[i])
     image = visualizeMatrix(matrix)
     return image
 

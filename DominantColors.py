@@ -40,7 +40,7 @@ def DominantColorsFun(img):
         # print(f'{index + 1}. RGB: {row}')
     return(min(rgbValues)) #find darkest color. takes care of highlights
 
-print(DominantColorsFun(image))
+# print(DominantColorsFun(image))
 #
 # #Quantize image
 # centers = np.uint8(centers)
