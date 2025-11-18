@@ -43,7 +43,7 @@ cv2.imshow("Rotated", cropped_bin)
 cv2.waitKey(0)
 
 #FindUp
-isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(whole_blob, whole_blob)
+isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(blob, whole_blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
 if isUp is False:
