@@ -7,7 +7,7 @@ import Segmentation
 import PreProcessing
 import json
 from DominantColors import DominantColorsFun
-from ColorProcessor import visualizeMatrix
+from ColorProcessor import visualizeMatrix, connectColors
 
 img = cv.imread("TrainingImages//test3.png")
 imgOrg = img.copy()
@@ -62,7 +62,7 @@ for y, row in enumerate(brick_matrix):
 for y in range(len(colorMatrix)):
     print(colorMatrix[y])
 
-visualizeMatrix(colorMatrix)
+connectColors(colorMatrix)
 
 print(len(brick_matrix))
 

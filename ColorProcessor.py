@@ -64,7 +64,7 @@ def visualizeMatrix(matrix):
 
 # connect colors
 def connectColors(matrix):
-    colorVariance = 150
+    colorVariance = 50
     bgr = [False, False, False]
 
     # print("\n")
