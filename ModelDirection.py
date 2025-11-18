@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 
 
 def rotateImage(orgImg, angle):
@@ -105,7 +104,8 @@ def edge(original):
 
     return add_edge
 
-def brickEdge(inputImg):
+def brickEdge(img):
+    inputImg = img.copy()
     blur = cv2.blur(inputImg, (23, 23))
     median = cv2.medianBlur(inputImg, 23)
 
@@ -146,48 +146,11 @@ def brickEdge(inputImg):
 
     cv2.waitKey(0)
     return lineThresh, edges
-'''def SVD(image):
-    height, width = image.shape[:2]
-
-    ys, xs = np.nonzero(image)
-    points = np.column_stack((xs, ys))
-
-    # --- Compute dominant direction via covariance + SVD ---
-    points_centered = points - points.mean(axis=0)
-    cov = np.cov(points_centered, rowvar=False)
-    Ut, _, Vt = np.linalg.svd(cov)
-    dominant_direction = Vt[0]
-
-    # --- Compute dominant angle (corrected for OpenCV Y-down) ---
-    dominant_angle = np.degrees(np.arctan2(-dominant_direction[1], dominant_direction[0]))
-    dominant_angle = (dominant_angle + 180) % 180
-
-    print(f"Detected dominant angle: {dominant_angle:.2f}°")
-
-    # --- Compute how much to rotate back upright ---
-    correction_angle = 180 - dominant_angle
-    print(f"Rotating image by {correction_angle:.2f}° to make upright")
-
-    # --- Rotate the image back upright ---
-    center = (width // 2, height // 2)
-    M = cv2.getRotationMatrix2D(center, correction_angle, 1.0)
-    upright_image = cv2.warpAffine(image, M, (width, height))
-
-    # --- Display results ---
-    plt.figure(figsize=(12, 5))
-
-    plt.subplot(1, 2, 1)
-    plt.imshow(image, cmap='gray')
-    plt.title(f"Before correction ({dominant_angle:.1f}°)")
-
-    plt.subplot(1, 2, 2)
-    plt.imshow(upright_image, cmap='gray')
-    plt.title("After correction (upright)")
-
-    plt.show()'''
 
 
-def dominant_angle_from_lines(image):
+
+def dominant_angle_from_lines(img):
+    image = img.copy()
     # Canny edges
     edges = cv2.Canny(image, 100, 200)
 
@@ -213,66 +176,16 @@ def dominant_angle_from_lines(image):
     print(f"Detected dominant edge angle: {dominant_angle:.2f}°")
 
     # Rotate image to make edges vertical (optional)
-    height, width = image.shape[:2]
-    center = (width // 2, height // 2)
+    '''height, width = image.shape[:2]
+    center = (width // 2, height // 2)'''
     correction = dominant_angle - 180
-    M = cv2.getRotationMatrix2D(center, correction, 1.0)
-    upright = cv2.warpAffine(image, M, (width, height))
-    # Show before/after
-    plt.figure(figsize=(12,5))
-    plt.subplot(1,2,1)
-    plt.imshow(image, cmap='gray')
-    plt.title(f"Before correction ({dominant_angle:.1f}°)")
-    plt.subplot(1,2,2)
-    plt.imshow(upright, cmap='gray')
-    plt.title("After correction (upright)")
-    #plt.show()
-
-    return upright, correction
+    '''M = cv2.getRotationMatrix2D(center, correction, 1.0)
+    upright = cv2.warpAffine(img, M, (width, height))'''
 
 
-
-'''input_image = cv2.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
-test_rotated = rotateImage(input_image, 0)
-test_rotate_edgedetected = rotateImage(brickEdge(input_image)[1], 0)
-#input_image = rotateImage(brickEdge(input_image)[1], 60)
-#input_image = rotateImage(blob(input_image)[1])
-angle = dominant_angle_from_lines(test_rotate_edgedetected)[1]
-
-rotated = rotateImage(blob(test_rotated)[0], angle)
+    return correction
 
 
 
 
-
-cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
-cv2.imshow("rotated", rotated)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-contours, _ = cv2.findContours(rotated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-print(len(contours))
-
-crop = BoundingBox.find_bounding_box(rotated)
-
-cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
-cv2.imshow("rotated", crop)
-
-isUp, dotHight, brickHight, brickWidth = Matrix.find_up(crop)
-print(isUp)
-final_img = crop
-if not isUp:
-    final_img = rotateImage(crop, 180)
-
-cv2.namedWindow("rotated", cv2.WINDOW_NORMAL)
-cv2.imshow("rotated", final_img)
-cv2.waitKey(0)
-
-matrix = Matrix.matrix_slice(final_img, brickHight, brickWidth, dotHight)
-
-for y, row in enumerate(matrix):
-    for x, col in enumerate(row):
-        cv2.imshow(f"{y}, {x}", col)
-        cv2.waitKey(0)'''
-#SVD(edge(input_image))
-#SVD(input_image)
 

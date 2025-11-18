@@ -9,7 +9,7 @@ import json
 from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix
 
-img = cv.imread("TrainingImages//test4.jpg")
+img = cv.imread("TrainingImages//test3.png")
 imgOrg = img.copy()
 
 #Pre-Processing
@@ -29,7 +29,7 @@ cv2.imshow("Original", blob)
 cv2.waitKey(0)
 
 #Direction
-dominant_angle = MD.dominant_angle_from_lines(edge)[1]
+dominant_angle = MD.dominant_angle_from_lines(edge)
 
 #Rotate
 rotated = MD.rotateImage(blob, dominant_angle)
