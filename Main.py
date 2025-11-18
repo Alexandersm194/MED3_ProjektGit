@@ -9,7 +9,7 @@ import json
 from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix
 
-img = cv.imread("TrainingImages//test3.png")
+img = cv.imread("TrainingImages//test4.jpg")
 imgOrg = img.copy()
 
 #Pre-Processing
@@ -41,7 +41,7 @@ cv2.waitKey(0)
 isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(blob, blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
-if isUp:
+if isUp is False:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
     corrected_img = MD.rotateImage(corrected_img, 180)
 
