@@ -118,13 +118,13 @@ def find_up(crop, ref):
     top = 0
     bottom = 0
 
-    for y in range(LegoBrickDotHeight):
+    for y in range(LegoBrickDotHeight * 5):
         for x in range(crop.shape[1]):
             print(f"Top: {crop[y, x]}")
             if crop[y, x] == 255:
                 top += 1
 
-    for y in range(LegoBrickDotHeight):
+    for y in range(LegoBrickDotHeight * 5):
         bot = crop.shape[0] - y - 1
         for x in range(crop.shape[1]):
             print(f"Bottom: {crop[bot, x]}")
@@ -132,7 +132,7 @@ def find_up(crop, ref):
                 bottom += 1
 
     print(f"Top: {top}, Bottom: {bottom}")
-    isUp = False if top > bottom else True
+    isUp = False if top < bottom else True
     return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth
 
 
