@@ -1,6 +1,31 @@
 import cv2 as cv
 import numpy as np
 import math
+
+def background_removal(image):
+    # Indlæs billede
+
+    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+
+    # Definér område for hvide og grå toner
+    lower_color = np.array([0, 150, 0])  # Lav mætning og lysstyrke udelukkes
+    upper_color = np.array([180, 255, 255])  # Alt med farve beholdes
+
+    # Lav maske
+    mask = cv.inRange(hsv, lower_color, upper_color)
+
+    kernel = np.ones((5, 5), np.uint8)
+    closedPic = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel, iterations=3)
+    closedPic = cv.morphologyEx(closedPic, cv.MORPH_OPEN, kernel, iterations=3)
+    # Vis resultat
+    result = cv.bitwise_and(image, image, mask=closedPic)
+    cv.imshow("Maske", closedPic)
+    cv.imshow("Resultat", result)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+    return closedPic, result
+
 def crop_rotated_rect(image, rect):
     # Get box corner points
     box = cv.boxPoints(rect)

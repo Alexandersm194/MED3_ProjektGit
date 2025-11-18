@@ -13,11 +13,16 @@ img = cv.imread("TrainingImages//test3.png")
 imgOrg = img.copy()
 
 #Pre-Processing
-
+yIn = img.shape[0] // 7
+xIn = img.shape[1] // 5
+figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+cv.imshow("Original", figureImg)
+cv.waitKey(0)
 
 #Background Removal
-blob = MD.blob(img)[0]
-edge = MD.brickEdge(img)[1]
+whole_blob = Segmentation.background_removal(img)[0]
+blob = Segmentation.background_removal(figureImg)[0]
+edge = MD.brickEdge(figureImg)[1]
 
 cv2.namedWindow("Original", cv2.WINDOW_NORMAL)
 cv2.imshow("Original", blob)
@@ -28,7 +33,7 @@ dominant_angle = MD.dominant_angle_from_lines(edge)[1]
 
 #Rotate
 rotated = MD.rotateImage(blob, dominant_angle)
-rotated_org = MD.rotateImage(imgOrg, dominant_angle)
+rotated_org = MD.rotateImage(figureImg, dominant_angle)
 
 #FindBoundingBox
 cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
@@ -38,7 +43,7 @@ cv2.imshow("Rotated", cropped_bin)
 cv2.waitKey(0)
 
 #FindUp
-isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(blob, blob)
+isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(whole_blob, whole_blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
 if isUp:
