@@ -3,7 +3,7 @@ import math
 import cv2
 import cv2 as cv
 import numpy as np
-
+import Segmentation
 
 def find_up(crop, ref):
     #ref = cv.imread("back.JPG")
@@ -19,7 +19,9 @@ def find_up(crop, ref):
     hightVar = hight // 2
     widthVar = width // 5
 
-    kernel = np.ones((50, 50), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
+    ref = cv.erode(ref, kernel, iterations=1)
+    ref = cv.dilate(ref, kernel, iterations=1)
     corners = [
         ref[0:hightVar, 0:widthVar],
         ref[0:hightVar, (width - widthVar):width],
@@ -44,6 +46,7 @@ def find_up(crop, ref):
 
     corner = corners[0]
 
+
     contours, _ = cv.findContours(corner, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     figure_cnt = None
@@ -62,6 +65,8 @@ def find_up(crop, ref):
         #cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("No orange object found.")
+
+    cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, crop)
 
     LegoBrickDotHeight = math.floor(LegoBrickHeight * 0.15)
     print(LegoBrickDotHeight)
