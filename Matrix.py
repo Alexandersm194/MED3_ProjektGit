@@ -5,6 +5,31 @@ import cv2 as cv
 import numpy as np
 import Segmentation
 
+
+def removeBorderConnected(img):
+    # ensure image is uint8 single channel
+    im = img.copy().astype(np.uint8)
+
+    h, w = im.shape[:2]
+
+    # mask MUST be 2 pixels bigger
+    mask = np.zeros((h+2, w+2), np.uint8)
+
+    # flood-fill from all border points
+    # remove border-connected white (255)
+    for x in range(w):
+        if im[0, x] == 255:
+            cv.floodFill(im, mask, (x, 0), 0)
+        if im[h-1, x] == 255:
+            cv.floodFill(im, mask, (x, h-1), 0)
+
+    for y in range(h):
+        if im[y, 0] == 255:
+            cv.floodFill(im, mask, (0, y), 0)
+        if im[y, w-1] == 255:
+            cv.floodFill(im, mask, (w-1, y), 0)
+
+    return im
 def find_up(crop, ref):
     #ref = cv.imread("back.JPG")
 
@@ -44,27 +69,42 @@ def find_up(crop, ref):
     frame_threshed = cv.inRange(hsv_img, ORANGE_MIN, ORANGE_MAX)
     closed = cv.morphologyEx(frame_threshed, cv.MORPH_OPEN, kernel, iterations=1)'''
 
-    corner = corners[0]
+    #corner = corners[0]
 
+    corrected_corners = []
 
-    contours, _ = cv.findContours(corner, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    for corner in corners:
+        corrected_corners.append(removeBorderConnected(corner))
+        cv2.imshow("Corner", removeBorderConnected(corner))
+        cv2.waitKey(0)
 
     figure_cnt = None
     biggest_cnt_area = 0
+
+    for crn in corrected_corners:
+        contours, _ = cv.findContours(crn, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+        for i, contour in enumerate(contours):
+            area = cv.contourArea(contour)
+            if area > biggest_cnt_area:
+                figure_cnt = contour
+                biggest_cnt_area = area
+
+    '''contours, _ = cv.findContours(corners[0], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     for i, contour in enumerate(contours):
         area = cv.contourArea(contour)
         if area > biggest_cnt_area:
             figure_cnt = contour
             biggest_cnt_area = area
 
-    if contours:
-        x, y, w, h = cv.boundingRect(figure_cnt)
-        LegoBrickWidth = w
-        LegoBrickHeight = h
-        # Since this is top-left corner, no offset needed
-        #cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
-    else:
-        print("No orange object found.")
+        if contours:
+            x, y, w, h = cv.boundingRect(figure_cnt)
+            LegoBrickWidth = w
+            LegoBrickHeight = h
+            # Since this is top-left corner, no offset needed
+            #cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
+        else:
+            print("No orange object found.")'''
 
     cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, crop)
 
