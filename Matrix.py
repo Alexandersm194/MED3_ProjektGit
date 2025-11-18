@@ -1,11 +1,12 @@
 import math
 
+import cv2
 import cv2 as cv
 import numpy as np
 
 
-def find_up(crop):
-    ref = cv.imread("back.JPG")
+def find_up(crop, ref):
+    #ref = cv.imread("back.JPG")
 
     LegoBrickDotHeight = 0
     LegoBrickDotWidth = 0
@@ -15,7 +16,7 @@ def find_up(crop):
     LegoBrickWidth = 0
 
     hight, width = ref.shape[:2]
-    hightVar = hight // 4
+    hightVar = hight // 2
     widthVar = width // 5
 
     kernel = np.ones((50, 50), np.uint8)
@@ -26,19 +27,35 @@ def find_up(crop):
         ref[(hight - hightVar):hight, (width - widthVar):width]
     ]
 
-    ORANGE_MIN = np.array([5, 50, 50], np.uint8)
+    for corner in corners:
+        cv2.imshow("Corner", corner)
+        cv2.waitKey(0)
+
+
+
+    '''ORANGE_MIN = np.array([5, 50, 50], np.uint8)
     ORANGE_MAX = np.array([15, 255, 255], np.uint8)
 
     # Process first corner (top-left)
     corner = corners[0]
     hsv_img = cv.cvtColor(corner, cv.COLOR_BGR2HSV)
     frame_threshed = cv.inRange(hsv_img, ORANGE_MIN, ORANGE_MAX)
-    closed = cv.morphologyEx(frame_threshed, cv.MORPH_OPEN, kernel, iterations=1)
+    closed = cv.morphologyEx(frame_threshed, cv.MORPH_OPEN, kernel, iterations=1)'''
 
-    contours, _ = cv.findContours(closed, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    corner = corners[0]
+
+    contours, _ = cv.findContours(corner, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+    figure_cnt = None
+    biggest_cnt_area = 0
+    for i, contour in enumerate(contours):
+        area = cv.contourArea(contour)
+        if area > biggest_cnt_area:
+            figure_cnt = contour
+            biggest_cnt_area = area
 
     if contours:
-        x, y, w, h = cv.boundingRect(contours[0])
+        x, y, w, h = cv.boundingRect(figure_cnt)
         LegoBrickWidth = w
         LegoBrickHeight = h
         # Since this is top-left corner, no offset needed
@@ -69,6 +86,7 @@ def find_up(crop):
             if crop[bot, x] == 255:
                 bottom += 1
 
+    print(f"Top: {top}, Bottom: {bottom}")
     isUp = False if top > bottom else True
     return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth
 
@@ -89,10 +107,13 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
 
             # Crop brick, skipping top dot region if specified
             brickImg = img[start_y + dotHeight:end_y + dotHeight, start_x:end_x]
+            cv2.imshow("Brick", brickImg)
+            cv2.waitKey(0)
 
             row.append(brickImg)
 
         final_matrix.append(row)
+
 
     return final_matrix
 
