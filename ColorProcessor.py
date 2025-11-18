@@ -18,11 +18,11 @@ import random
 # def color3():
 #     color = (random.randint(b3,b3+randRange)),(random.randint(g3,g3+randRange)),(random.randint(r3,r3+randRange))
 #     return color
-
-# #color visualization
-
-
-# #example matrix
+#
+# # #color visualization
+#
+#
+# # #example matrix
 # exampleMatrix = []
 # rows = 3
 # cols = 5
@@ -62,7 +62,39 @@ def visualizeMatrix(matrix):
     cv.waitKey(0)
     return image
 
+# connect colors
+def connectColors(matrix):
+    colorVariance = 50
+    bgr = [False, False, False]
+
+    # print("\n")
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            for k in range(len(matrix[i])):
+                if k > j:
+                    for t in range(len(matrix[i][j])):
+
+                        # print(matrix[i][k][t])
+                        # print(matrix[i][j][t])
+                        if matrix[i][k][t] > matrix[i][j][t] - colorVariance and matrix[i][k][t] < matrix[i][j][t] + colorVariance:
+                            bgr[t] = True
+                            # print(i, j, k, bgr[t])
+                        else:
+                            bgr[t] = False
+                if all(bgr):
+                    # print("same color")
+                    matrix[i][k] = matrix[i][j]
+                    bgr =  [False, False, False]
+        # print(matrix[i])
+    image = visualizeMatrix(matrix)
+    return image
+
+
 # image = visualizeMatrix(exampleMatrix)
-#
+# imageConnected = connectColors(exampleMatrix)
+# print(exampleMatrix[0][0][0])
+# print(type(exampleMatrix[0][0][0]))
+
 # cv.imshow('colors', image)
+# cv.imshow('new colors', imageConnected)
 # cv.waitKey(0)
