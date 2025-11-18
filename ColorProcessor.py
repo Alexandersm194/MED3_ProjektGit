@@ -58,15 +58,15 @@ def visualizeMatrix(matrix):
             row.append(createBars(matrix[i][j]))
         bars.append(np.hstack(row))
     image = np.concatenate(bars, axis=0)
-    cv.imshow('colors', image)
-    cv.waitKey(0)
+    # cv.imshow('colors', image)
+    # cv.waitKey(0)
     return image
 
 # connect colors
 def connectColors(matrix):
     #cycle through every row, get dominant color (small difference) get outlier color (big difference)
-    colorRange = 0
-    colorVariance = 5
+    colorRange = []
+    colorVariance = 110
     outlierVariance = 20
     bgr = [False, False, False]
 
@@ -74,18 +74,20 @@ def connectColors(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
             for k in range(len(matrix[i])):
-                for tuple in range(len(matrix[i][j])):
-                    if k != j:
-                        # print(matrix[i][k][tuple])
-                        # print(matrix[i][j][tuple])
-                        if matrix[i][k][tuple] != matrix[i][j][tuple]:
-                            if matrix[i][k][tuple] < matrix[i][j][tuple] - colorVariance or matrix[i][k][tuple] > matrix[i][j][tuple] + colorVariance:
-                                bgr[tuple] = True
-                    else:
-                        bgr[tuple] = False
+                if k > j:
+                    for t in range(len(matrix[i][j])):
+
+                        # print(matrix[i][k][t])
+                        # print(matrix[i][j][t])
+                        if matrix[i][k][t] > matrix[i][j][t] - colorVariance and matrix[i][k][t] < matrix[i][j][t] + colorVariance:
+                            bgr[t] = True
+                            print(i, j, k, bgr[t])
+                        else:
+                            bgr[t] = False
                 if all(bgr):
-                    print(i, j)
+                    print("same color")
                     matrix[i][k] = matrix[i][j]
+                    bgr =  [False, False, False]
         print(matrix[i])
     image = visualizeMatrix(matrix)
     return image
