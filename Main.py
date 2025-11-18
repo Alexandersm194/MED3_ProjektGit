@@ -62,9 +62,10 @@ for y, row in enumerate(brick_matrix):
 for y in range(len(colorMatrix)):
     print(colorMatrix[y])
 
-connectColors(colorMatrix)
+colorMatrix = connectColors(colorMatrix)
 
-print(len(brick_matrix))
+# print(colorMatrix)
+# print(len(brick_matrix))
 
 #Feature Extraction And Classification
 '''for y, row in enumerate(brick_matrix):
