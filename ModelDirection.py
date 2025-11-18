@@ -32,15 +32,16 @@ def blob(input):
 
     hsv = cv2.cvtColor(adjusted, cv2.COLOR_BGR2HSV)
 
-    # Define the white range
-    # White = low saturation, high brightness
-    lower_white = np.array([0, 0, 200])  # H: any, S: low, V: high
-    upper_white = np.array([180, 100, 255])  # Allow small variation
+    lower_white = np.array([0, 0, 180])  # Only brighter whites
+    upper_white = np.array([180, 50, 255])
 
     # Create mask for white
     mask_white = cv2.inRange(hsv, lower_white, upper_white)
 
     mask_inv = cv2.bitwise_not(mask_white)
+
+
+
 
     # Keep only non-white areas
     backgroundRemoved = cv2.bitwise_and(adjusted, adjusted, mask=mask_inv)
@@ -52,10 +53,7 @@ def blob(input):
     closedPicture = closing(output_image, kernel)
 
     stuff = cv2.bitwise_and(input, input, mask=closedPicture)
-    cv2.namedWindow("edges", cv2.WINDOW_NORMAL)
-    cv2.imshow("edges", stuff)
 
-    cv2.waitKey(0)
     return closedPicture, stuff
 
 def edge(original):

@@ -1,11 +1,13 @@
+import cv2
 import cv2 as cv
 import numpy as np
 import ModelDirection as MD
 import Matrix
 import Segmentation
+import PreProcessing
 import json
 
-img = cv.imread("C://Users//Alexa//Documents//GitHub//MED3_ProjektGit//TrainingImages//Fisk.jpg")
+img = cv.imread("TrainingImages//test3.png")
 imgOrg = img.copy()
 
 #Pre-Processing
@@ -14,6 +16,10 @@ imgOrg = img.copy()
 #Background Removal
 blob = MD.blob(img)[0]
 edge = MD.brickEdge(img)[1]
+
+cv2.namedWindow("Original", cv2.WINDOW_NORMAL)
+cv2.imshow("Original", blob)
+cv2.waitKey(0)
 
 #Direction
 dominant_angle = MD.dominant_angle_from_lines(edge)[1]
@@ -26,11 +32,14 @@ rotated_org = MD.rotateImage(imgOrg, dominant_angle)
 cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
 cropped_org = rotated_org[y:y + h, x:x + w]
 
+cv2.imshow("Rotated", cropped_bin)
+cv2.waitKey(0)
+
 #FindUp
-isUp, dotHight, brickHight, brickWidth = Matrix.find_up(cropped_bin)
+isUp, dotHight, brickHight, brickWidth = Matrix.find_up(blob, blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
-if not isUp:
+if isUp:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
     corrected_img = MD.rotateImage(corrected_img, 180)
 
@@ -40,6 +49,8 @@ cv.waitKey(0)
 
 #BrickMatrix
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHight, brickWidth, dotHight)
+
+print(len(brick_matrix))
 
 #Feature Extraction And Classification
 '''for y, row in enumerate(brick_matrix):
@@ -52,11 +63,11 @@ brick_matrix = Matrix.matrix_slice(corrected_img, brickHight, brickWidth, dotHig
 # Brick
 
 ColorMatrix = [
-    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
-    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
-    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
-    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
-    ["red", "red" , "green", "blue", "blue", "blue", "green", "green", "green", "green"],
+    ["empty", "empty" , "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
+    ["empty", "empty" , "red", "red", "green", "green", "green", "green", "empty", "empty"],
+    ["empty", "empty" , "green", "green", "green", "green", "blue", "blue", "empty", "empty"],
+    ["empty", "empty" , "green", "empty", "green", "green", "empty", "blue", "empty", "empty"],
 ]
 
 final_brick_matrix = []
@@ -83,7 +94,6 @@ for y, row in enumerate(ColorMatrix):
             curr_brick_color = row[x]
             curr_brick_length = 1
 
-    # 👇 Add the last brick after the loop
     new_brick = brick.copy()
     new_brick["length"] = curr_brick_length
     new_brick["color"] = curr_brick_color
