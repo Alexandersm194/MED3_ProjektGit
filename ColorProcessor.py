@@ -91,57 +91,6 @@ def connectColors(matrix):
     image = visualizeMatrix(matrix)
     return image, matrix
 
-def grassFire(matrix):
-    dq = deque([])
-    blob = 0  # information stored in current blob
-    blobs = []  # collected information about blobs
-    blobNum = 0
-    colorVariance = 50
-
-    def matchBGR(i, j, matrix):
-        bgr = [False, False, False]
-        for k in range(len(matrix[i])):
-            for t in range(len(matrix[i][j])):
-                # print(matrix[i][k][t])
-                # print(matrix[i][j][t])
-                if matrix[i][j][t] - colorVariance < matrix[i][k][t] < matrix[i][j][t] + colorVariance:
-                    bgr[t] = True
-                    # print(i, j, k, bgr[t])
-                else:
-                    bgr[t] = False
-            if all(bgr):
-                return True
-        return False
-
-
-    def spit(i, j, matrix, blobNum, blob):
-
-        if matrix[i][j] != (0,0,0):
-            blob += 1
-
-        if dq:
-            dq.popleft()
-            dq.popleft()
-
-        if j + 1 < cols and matrix[i][j+1] == matchBGR(i, j, matrix):
-            dq.append(i)
-            dq.append(j+1)
-        if i + 1 < rows and matrix[i+1][j] == matchBGR(i, j, matrix):
-            dq.append(i+1)
-            dq.append(j)
-        if i - 1 >= 0 and matrix[i-1][j] == matchBGR(i, j, matrix):
-            dq.append(i-1)
-            dq.append(j)
-        if j - 1 >= 0 and matrix[i][j-1] == matchBGR(i, j, matrix):
-            dq.append(i)
-            dq.append(j-1)
-
-        matrix[i][j] = (0,0,0)
-        if dq:
-            spit(dq[0], dq[1], matrix, blobNum, blob)
-        else:
-            blobs.append(blob)
-
 image = visualizeMatrix(exampleMatrix)
 imageConnected, newMatrix = connectColors(exampleMatrix)
 # print(exampleMatrix[0][0][0])
