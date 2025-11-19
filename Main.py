@@ -8,12 +8,14 @@ import PreProcessing
 import json
 from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
-import copy
+from PointImgCrop import rectify
 
-img = cv.imread("TrainingImages//test4.jpg")
+img = cv.imread("TrainingImages//perspectiveTest3.jpg")
+img = rectify(img)
 imgOrg = img.copy()
 
-#Pre-Processingl
+#Pre-Processing
+
 yIn = img.shape[0] // 7
 xIn = img.shape[1] // 5
 figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
