@@ -62,7 +62,7 @@ for y, row in enumerate(brick_matrix):
 for y in range(len(colorMatrix)):
     print(colorMatrix[y])
 
-colorMatrix = connectColors(colorMatrix)
+colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
 # print(colorMatrix)
 # print(len(brick_matrix))

@@ -1,10 +1,10 @@
 import cv2 as cv
 import numpy as np
 
-image = cv.imread('fishImages/fish1/fish1_1.jpg')
-image = cv.resize(image,(1008,756))
-image = image[270:500,220:800] #cropout of fish
-image = image[28:59,58:178] #cropout of block
+# image = cv.imread('fishImages/fish1/fish1_1.jpg')
+# image = cv.resize(image,(1008,756))
+# image = image[270:500,220:800] #cropout of fish
+# image = image[28:59,58:178] #cropout of block
 
 def DominantColorsFun(img):
     # createBars funktion laver en bar med farverne og deres farvekoder. når scriptet er testet færdig skal den ændres til kun at returnere farvekode
@@ -15,6 +15,9 @@ def DominantColorsFun(img):
         return bar, (red, green, blue)
 
     height, width, _ = np.shape(img)  # height and width required for calculating pixels
+    crop = 0.2
+    img = img[int(0+height*crop):int(height-height*crop), int(0+width*crop):int(width-width*crop)]
+    height, width, _ = np.shape(img)
     data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
     data = np.float32(data) #convert to float
 
@@ -41,7 +44,9 @@ def DominantColorsFun(img):
     return(min(rgbValues)) #find darkest color. takes care of highlights
 
 # print(DominantColorsFun(image))
-#
+# height, width, _ = np.shape(image)  # height and width required for calculating pixels
+# crop = 0.3
+# image = image[int(0+height*crop):int(height-height*crop), int(0+width*crop):int(width-width*crop)]
 # #Quantize image
 # centers = np.uint8(centers)
 # imgQuantized = centers[labels.flatten()]
@@ -49,6 +54,6 @@ def DominantColorsFun(img):
 #
 # cv.imshow('Dominant colors', imgBar)
 # cv.imshow('Image colors quantized', imgQuantized)
-# cv.imshow('Image', img)
+# cv.imshow('Image', image)
 #
 # cv.waitKey(0)
