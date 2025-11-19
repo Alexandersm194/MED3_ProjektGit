@@ -108,6 +108,9 @@ def find_up(crop, ref):
 
     cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, crop)
 
+    if LegoBrickWidth > LegoBrickHeight:
+        LegoBrickWidth, LegoBrickHeight = LegoBrickHeight, LegoBrickWidth
+
     LegoBrickDotHeight = math.floor(LegoBrickHeight * 0.15)
     print(LegoBrickDotHeight)
 
@@ -156,8 +159,10 @@ def count_bricks_horizontal(img_width, brickWidth, tolerance=0.0):
             break
 
     return len(bricks)
+
 def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     final_matrix = []
+    print(brickWidth, brickHeight)
 
     img_h, img_w = img.shape[:2]
 

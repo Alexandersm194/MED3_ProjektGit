@@ -8,14 +8,16 @@ import PreProcessing
 import json
 from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
+import copy
 
-img = cv.imread("TrainingImages//test3.png")
+img = cv.imread("TrainingImages//test4.jpg")
 imgOrg = img.copy()
 
-#Pre-Processing
+#Pre-Processingl
 yIn = img.shape[0] // 7
 xIn = img.shape[1] // 5
 figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+cv.imshow("Image", img)
 cv.imshow("Original", figureImg)
 cv.waitKey(0)
 
@@ -83,7 +85,7 @@ colorMatrix = connectColors(colorMatrix)
 
 SomethingMatrix = []
 # Brick
-for y, row in enumerate(blob_brick_matrix):
+'''for y, row in enumerate(blob_brick_matrix):
     newRow = []
     for x, col in enumerate(row):
         midY = col.shape[0] // 2
@@ -94,7 +96,7 @@ for y, row in enumerate(blob_brick_matrix):
             newRow.append("Something")
     SomethingMatrix.append(newRow)
 
-print(SomethingMatrix)
+print(SomethingMatrix)'''
 
 
 ColorMatrix = [
@@ -105,34 +107,134 @@ ColorMatrix = [
     ["empty", "empty" , "green", "empty", "green", "green", "empty", "blue", "empty", "empty"],
 ]
 
-final_brick_matrix = []
+
+brick = {
+    "color": None,
+    "isEmpty": False,
+}
+
+brick_matrix = []
+
+for y, row in enumerate(colorMatrix):
+    new_row = []
+    for x, col in enumerate(row):
+        newBrick = brick.copy()
+        newBrick["color"] = col
+
+        midY = blob_brick_matrix[y][x].shape[0] // 2
+        midX = blob_brick_matrix[y][x].shape[1] // 2
+        if blob_brick_matrix[y][x][midY][midX] == 0:
+            newBrick["isEmpty"] = True
+
+        new_row.append(newBrick)
+    brick_matrix.append(new_row)
+
+
+'''final_brick_matrix = []
 for y, row in enumerate(ColorMatrix):
     final_brick_matrix.append([])
 
-brick = {
+brick_final = {
     "length": 0,
-    "color": ""
+    "color": "",
+    "isEmpty": False
 }
 
-for y, row in enumerate(ColorMatrix):
-    curr_brick_color = row[0]
+for y, row in enumerate(brick_matrix):
+    curr_brick_color = row[0]["color"]
+    curr_brick_isEmpty = row[0]["isEmpty"]
     curr_brick_length = 1
 
     for x in range(1, len(row)):
-        if row[x] == curr_brick_color:
-            curr_brick_length += 1
-        else:
-            new_brick = brick.copy()
-            new_brick["length"] = curr_brick_length
+        if row[x]["isEmpty"]:
+            new_brick = brick_final.copy()
+            new_brick["length"] = 1
             new_brick["color"] = curr_brick_color
-            final_brick_matrix[y].append(new_brick)
-            curr_brick_color = row[x]
-            curr_brick_length = 1
+            new_brick["isEmpty"] = True
 
-    new_brick = brick.copy()
+        else:
+            if row[x]["color"] == curr_brick_color:
+                curr_brick_length += 1
+            else:
+                new_brick = brick_final.copy()
+                new_brick["length"] = curr_brick_length
+                new_brick["color"] = curr_brick_color
+                new_brick["isEmpty"] = brick_matrix[y][x]["isEmpty"]
+                final_brick_matrix[y].append(new_brick)
+                curr_brick_color = row[x]["color"]
+                curr_brick_length = 1
+
+    new_brick = brick_final.copy()
     new_brick["length"] = curr_brick_length
     new_brick["color"] = curr_brick_color
+    new_brick["isEmpty"] = False
     final_brick_matrix[y].append(new_brick)
+
+
+
+print(final_brick_matrix)'''
+
+brick_final = {
+    "length": 0,
+    "color": "",
+    "isEmpty": False
+}
+
+final_brick_matrix = []
+
+for y, row in enumerate(brick_matrix):
+    final_row = []
+    curr_brick_color = None
+    curr_brick_length = 0
+
+    for brick in row:
+        if brick["isEmpty"]:
+            # Finish any current non-empty sequence
+            if curr_brick_length > 0:
+                new_brick = brick_final.copy()
+                new_brick["length"] = curr_brick_length
+                new_brick["color"] = curr_brick_color
+                new_brick["isEmpty"] = False
+                final_row.append(new_brick)
+                curr_brick_color = None
+                curr_brick_length = 0
+
+            # Add empty brick as its own entry
+            new_brick = brick_final.copy()
+            new_brick["length"] = 1
+            new_brick["color"] = brick["color"]
+            new_brick["isEmpty"] = True
+            final_row.append(new_brick)
+
+        else:
+            # Non-empty brick
+            if brick["color"] == curr_brick_color:
+                curr_brick_length += 1
+            else:
+                # Finish previous sequence
+                if curr_brick_length > 0:
+                    new_brick = brick_final.copy()
+                    new_brick["length"] = curr_brick_length
+                    new_brick["color"] = curr_brick_color
+                    new_brick["isEmpty"] = False
+                    final_row.append(new_brick)
+
+                # Start new sequence
+                curr_brick_color = brick["color"]
+                curr_brick_length = 1
+
+    # Finish any remaining sequence at end of row
+    if curr_brick_length > 0:
+        new_brick = brick_final.copy()
+        new_brick["length"] = curr_brick_length
+        new_brick["color"] = curr_brick_color
+        new_brick["isEmpty"] = False
+        final_row.append(new_brick)
+
+    final_brick_matrix.append(final_row)
+
+print(final_brick_matrix)
+
 
 json_str = json.dumps(final_brick_matrix)
 with open("sample.json", "w") as f:
