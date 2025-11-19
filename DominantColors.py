@@ -15,7 +15,7 @@ def DominantColorsFun(img):
         return bar, (red, green, blue)
 
     height, width, _ = np.shape(img)  # height and width required for calculating pixels
-    crop = 0.2
+    crop = 0.4
     img = img[int(0+height*crop):int(height-height*crop), int(0+width*crop):int(width-width*crop)]
     height, width, _ = np.shape(img)
     data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
