@@ -46,7 +46,7 @@ import random
 #visualize matrix
 def visualizeMatrix(matrix):
     def createBars(color):
-        bar = np.zeros((100, 100, 3), np.uint8) #zeros creates an ndarray of zeroes
+        bar = np.zeros((100, 100, 3), np.uint8) #zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
         bar[:] = color #assigns color value to each element in ndarray
         return bar
 
