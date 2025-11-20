@@ -9,8 +9,9 @@ import json
 from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
+from BackgroundSubtraction import remove_background
 
-img = cv.imread("TrainingImages//perspectiveTest3.jpg")
+img = cv.imread("TrainingImages//perspectiveTest4.jpg")
 img = rectify(img)
 
 
@@ -27,8 +28,11 @@ cv.imshow("Original", figureImg)
 cv.waitKey(0)
 
 #Background Removal
-whole_blob = Segmentation.background_removal(img)[0]
-blob = Segmentation.background_removal(figureImg)[0]
+'''whole_blob = Segmentation.background_removal(img)[0]
+blob = Segmentation.background_removal(figureImg)[0]'''
+
+whole_blob = remove_background(img)
+blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
 
 cv2.namedWindow("Original", cv2.WINDOW_NORMAL)
