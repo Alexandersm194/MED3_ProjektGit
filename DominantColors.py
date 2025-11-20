@@ -21,7 +21,7 @@ def DominantColorsFun(img):
     data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
     data = np.float32(data) #convert to float
 
-    clusterAmount = 1 #amount of colors to find
+    clusterAmount = 3 #amount of colors to find
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 15, 2.0) #maximum iterations and desired accuracy for criteria
     flags = cv.KMEANS_RANDOM_CENTERS #KMEANS_RANDOM/PP_CENTERS
     compactness, labels, centers = cv.kmeans(data, clusterAmount, None, criteria, 10, flags=flags)
