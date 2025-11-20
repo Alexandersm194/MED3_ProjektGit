@@ -17,3 +17,14 @@ def remove_shadows_preserve_color(image):
     result = cv2.cvtColor(lab_corrected, cv2.COLOR_LAB2BGR)
 
     return result
+
+def sharpened_image(image):
+    blur_amount = 23
+    gauss_amount = 23
+
+    blur = cv2.blur(image, (blur_amount, blur_amount))
+    gauss = cv2.GaussianBlur(blur, (gauss_amount, gauss_amount), 0)
+
+    sharpened_img = cv2.addWeighted(image, 1.7, blur, -0.8, 0)
+
+    return sharpened_img
