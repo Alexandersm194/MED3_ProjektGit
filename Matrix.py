@@ -130,7 +130,7 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     img_h, img_w = img.shape[:2]
 
     # robust detection of horizontal count
-    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth)
+    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth) - 1
     nrBricksVertical = (img_h - dotHeight) // brickHeight
 
     print("Detected bricks horizontally:", nrBricksHorizontal)

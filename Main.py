@@ -35,8 +35,8 @@ whole_blob = remove_background(img)
 blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
 
-cv2.namedWindow("Original", cv2.WINDOW_NORMAL)
-cv2.imshow("Original", blob)
+cv2.namedWindow("wholeBlob", cv2.WINDOW_NORMAL)
+cv2.imshow("wholeBlob", whole_blob)
 cv2.waitKey(0)
 
 #Direction
