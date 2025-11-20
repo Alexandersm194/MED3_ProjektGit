@@ -41,8 +41,8 @@ def find_up(crop, ref):
     LegoBrickWidth = 0
 
     hight, width = ref.shape[:2]
-    hightVar = hight // 4
-    widthVar = width // 4
+    hightVar = hight // 5
+    widthVar = width // 8
 
     kernel = np.ones((5, 5), np.uint8)
     ref = cv.erode(ref, kernel, iterations=1)

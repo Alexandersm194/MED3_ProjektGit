@@ -12,12 +12,16 @@ from PointImgCrop import rectify
 
 img = cv.imread("TrainingImages//perspectiveTest3.jpg")
 img = rectify(img)
+
+
 imgOrg = img.copy()
 
 #Pre-Processing
-yIn = img.shape[0] // 7
+figureImg = rectify(imgOrg)
+
+'''yIn = img.shape[0] // 7
 xIn = img.shape[1] // 5
-figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]'''
 cv.imshow("Image", img)
 cv.imshow("Original", figureImg)
 cv.waitKey(0)
