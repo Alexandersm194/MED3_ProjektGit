@@ -26,7 +26,7 @@
 import cv2 as cv
 import numpy as np
 
-img_path = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\fishImages\fish3\fish3_5.jpg")
+img_path = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\TrainingImages\test3.png")
 img = cv.resize(img_path, None, fx=0.25, fy=0.25)
 
 hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
