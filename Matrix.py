@@ -31,18 +31,9 @@ def removeBorderConnected(img):
 
     return im
 def find_up(crop, ref):
-    #ref = cv.imread("back.JPG")
-
-    LegoBrickDotHeight = 0
-    LegoBrickDotWidth = 0
-    LegoBrickCleanHeight = 0
-    LegoBrickCleanWidth = 0
-    LegoBrickHeight = 0
-    LegoBrickWidth = 0
-
     hight, width = ref.shape[:2]
     hightVar = hight // 5
-    widthVar = width // 8
+    widthVar = width // 7
 
     kernel = np.ones((5, 5), np.uint8)
     ref = cv.erode(ref, kernel, iterations=1)
@@ -139,7 +130,7 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     img_h, img_w = img.shape[:2]
 
     # robust detection of horizontal count
-    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth)
+    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth) - 1
     nrBricksVertical = (img_h - dotHeight) // brickHeight
 
     print("Detected bricks horizontally:", nrBricksHorizontal)
