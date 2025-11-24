@@ -45,17 +45,12 @@ def find_up(crop, ref):
         ref[(hight - hightVar):hight, (width - widthVar):width]
     ]
 
-    for corner in corners:
-        cv2.imshow("Corner", corner)
-        cv2.waitKey(0)
 
 
     corrected_corners = []
 
     for corner in corners:
         corrected_corners.append(removeBorderConnected(corner))
-        cv2.imshow("Corner", removeBorderConnected(corner))
-        cv2.waitKey(0)
 
     figure_cnt = None
     biggest_cnt_area = 0

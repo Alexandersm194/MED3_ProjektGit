@@ -27,10 +27,7 @@ def background_removal(image):
     closedPic = cv.morphologyEx(closedPic, cv.MORPH_OPEN, kernel, iterations=3)
     # Vis resultat
     result = cv.bitwise_and(image, image, mask=closedPic)
-    cv.imshow("Maske", closedPic)
-    cv.imshow("Resultat", result)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+
 
     return closedPic, result
 

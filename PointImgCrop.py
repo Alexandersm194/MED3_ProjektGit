@@ -89,19 +89,10 @@ def rectify(image):
     warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
     # show the original image and the edge detected image
     print("STEP 1: Edge Detection")
-    cv.imshow("Image", image)
-    cv.imshow("Edged", edged)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
 
     # show the contour (outline) of the piece of paper
     print("STEP 2: Find contours of paper")
     cv.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
-    cv.imshow("Outline", image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
 
-    cv.imshow("Original", imutils.resize(orig, height=650))
-    cv.imshow("Scanned", imutils.resize(warped, height=650))
-    cv.waitKey(0)
+
     return warped
