@@ -65,7 +65,7 @@ cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
 #BrickMatrix
-brickWidth += int(brickHeight*0.1) #changing brickWidth fixes cropping on this model but will not work with other models
+brickWidth += int(brickHeight*0.05) #changing brickWidth fixes cropping on this model but will not work with other models
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
 
@@ -85,12 +85,12 @@ colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 # print(len(brick_matrix))
 
 #Feature Extraction And Classification
-'''for y, row in enumerate(brick_matrix):
+for y, row in enumerate(brick_matrix):
     for x, col in enumerate(row):
         print(col.shape)
         cv.imshow(f"{y},{x}", col)
         cv.waitKey(0)
-        cv.destroyAllWindows()'''
+        # cv.destroyAllWindows()
 
 SomethingMatrix = []
 # Brick
@@ -248,7 +248,3 @@ print(final_brick_matrix)
 json_str = json.dumps(final_brick_matrix)
 with open("sample.json", "w") as f:
     f.write(json_str)
-
-
-
-
