@@ -31,18 +31,9 @@ def removeBorderConnected(img):
 
     return im
 def find_up(crop, ref):
-    #ref = cv.imread("back.JPG")
-
-    LegoBrickDotHeight = 0
-    LegoBrickDotWidth = 0
-    LegoBrickCleanHeight = 0
-    LegoBrickCleanWidth = 0
-    LegoBrickHeight = 0
-    LegoBrickWidth = 0
-
     hight, width = ref.shape[:2]
-    hightVar = hight // 2
-    widthVar = width // 5
+    hightVar = hight // 5
+    widthVar = width // 7
 
     kernel = np.ones((5, 5), np.uint8)
     ref = cv.erode(ref, kernel, iterations=1)
@@ -58,18 +49,6 @@ def find_up(crop, ref):
         cv2.imshow("Corner", corner)
         cv2.waitKey(0)
 
-
-
-    '''ORANGE_MIN = np.array([5, 50, 50], np.uint8)
-    ORANGE_MAX = np.array([15, 255, 255], np.uint8)
-
-    # Process first corner (top-left)
-    corner = corners[0]
-    hsv_img = cv.cvtColor(corner, cv.COLOR_BGR2HSV)
-    frame_threshed = cv.inRange(hsv_img, ORANGE_MIN, ORANGE_MAX)
-    closed = cv.morphologyEx(frame_threshed, cv.MORPH_OPEN, kernel, iterations=1)'''
-
-    #corner = corners[0]
 
     corrected_corners = []
 
@@ -90,23 +69,11 @@ def find_up(crop, ref):
                 figure_cnt = contour
                 biggest_cnt_area = area
 
-    '''contours, _ = cv.findContours(corners[0], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    for i, contour in enumerate(contours):
-        area = cv.contourArea(contour)
-        if area > biggest_cnt_area:
-            figure_cnt = contour
-            biggest_cnt_area = area
-
-        if contours:
-            x, y, w, h = cv.boundingRect(figure_cnt)
-            LegoBrickWidth = w
-            LegoBrickHeight = h
-            # Since this is top-left corner, no offset needed
-            #cv.rectangle(corners[0], (x, y), (x + w, y + h), (0, 255, 0), 2)
-        else:
-            print("No orange object found.")'''
 
     cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, crop)
+
+    if LegoBrickWidth > LegoBrickHeight:
+        LegoBrickWidth, LegoBrickHeight = LegoBrickHeight, LegoBrickWidth
 
     LegoBrickDotHeight = math.floor(LegoBrickHeight * 0.15)
     print(LegoBrickDotHeight)
@@ -136,19 +103,18 @@ def find_up(crop, ref):
     return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth
 
 
-def count_bricks_horizontal(img_width, brickWidth, tolerance=0.0):
+def count_bricks_horizontal(img_width, brickWidth, tolerance=0.01):
     bricks = []
     x = 0
 
-    # allowed +- 25% measurement error
+    # allowed +- tolerance for measurement error
     min_w = brickWidth * (1 - tolerance)
     max_w = brickWidth * (1 + tolerance)
 
     while True:
-        # next expected brick end
         next_x = x + brickWidth
 
-        # If next_x is within tolerated range of image width, count it
+        # only add the brick if it fully fits within the image (considering max tolerance)
         if next_x <= img_width + max_w:
             bricks.append((x, next_x))
             x = next_x
@@ -156,13 +122,15 @@ def count_bricks_horizontal(img_width, brickWidth, tolerance=0.0):
             break
 
     return len(bricks)
+
 def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     final_matrix = []
+    print(brickWidth, brickHeight)
 
     img_h, img_w = img.shape[:2]
 
     # robust detection of horizontal count
-    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth)
+    nrBricksHorizontal = count_bricks_horizontal(img_w, brickWidth) - 1
     nrBricksVertical = (img_h - dotHeight) // brickHeight
 
     print("Detected bricks horizontally:", nrBricksHorizontal)

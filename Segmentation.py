@@ -7,12 +7,20 @@ def background_removal(image):
 
     hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 
-    # Definér område for hvide og grå toner
+    # Definér område for farvede klodser
     lower_color = np.array([0, 150, 0])  # Lav mætning og lysstyrke udelukkes
     upper_color = np.array([180, 255, 255])  # Alt med farve beholdes
 
+    # Definér område for mørke klodser
+    lower_dark = np.array([0, 0, 0])
+    upper_dark = np.array([179, 255, 55])
+
     # Lav maske
-    mask = cv.inRange(hsv, lower_color, upper_color)
+    mask_color = cv.inRange(hsv, lower_color, upper_color)
+    mask_dark = cv.inRange(hsv, lower_dark, upper_dark)
+
+    # Kombinerede masker
+    mask = cv.bitwise_or(mask_color, mask_dark)
 
     kernel = np.ones((5, 5), np.uint8)
     closedPic = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel, iterations=3)

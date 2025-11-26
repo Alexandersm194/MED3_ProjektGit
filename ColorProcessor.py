@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import random
 
-# #example colors. står i bgr indtil videre
+#example colors. står i bgr indtil videre
 # randRange = 20
 # b1, g1, r1  = 30, 30, 100
 # def color1():
@@ -46,8 +46,8 @@ import random
 #visualize matrix
 def visualizeMatrix(matrix):
     def createBars(color):
-        bar = np.zeros((100, 100, 3), np.uint8)
-        bar[:] = color
+        bar = np.zeros((100, 75, 3), np.uint8) #zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
+        bar[:] = color #assigns color value to each element in ndarray
         return bar
 
     bars = []
@@ -66,6 +66,7 @@ def visualizeMatrix(matrix):
 def connectColors(matrix):
     colorVariance = 50
     bgr = [False, False, False]
+    avrColor = []
 
     # print("\n")
     for i in range(len(matrix)):
@@ -73,10 +74,9 @@ def connectColors(matrix):
             for k in range(len(matrix[i])):
                 if k > j:
                     for t in range(len(matrix[i][j])):
-
                         # print(matrix[i][k][t])
                         # print(matrix[i][j][t])
-                        if matrix[i][k][t] > matrix[i][j][t] - colorVariance and matrix[i][k][t] < matrix[i][j][t] + colorVariance:
+                        if matrix[i][j][t] - colorVariance < matrix[i][k][t] < matrix[i][j][t] + colorVariance:
                             bgr[t] = True
                             # print(i, j, k, bgr[t])
                         else:
@@ -87,11 +87,10 @@ def connectColors(matrix):
                     bgr =  [False, False, False]
         # print(matrix[i])
     image = visualizeMatrix(matrix)
-    return matrix
-
+    return image, matrix
 
 # image = visualizeMatrix(exampleMatrix)
-# imageConnected = connectColors(exampleMatrix)
+# imageConnected, newMatrix = connectColors(exampleMatrix)
 # print(exampleMatrix[0][0][0])
 # print(type(exampleMatrix[0][0][0]))
 

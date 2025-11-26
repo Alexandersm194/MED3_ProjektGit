@@ -1,38 +1,143 @@
 import cv2 as cv
+import imutils
 import numpy as np
 
 '''cv crop'''
-img_path = cv.imread('C:/Users/magnu/PycharmProjects/MED3_ProjektGit/fishImages/fish1/fish1_11.jpg')
+# img_path = cv.imread('C:/Users/magnu/PycharmProjects/MED3_ProjektGit/fishImages/fish1/fish1_10.jpg')
+#
+# img = cv.resize(img_path, None, fx=0.25, fy=0.25)
+#
+# gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+#
+# blur = cv.GaussianBlur(gray, (9, 9), 0)
+# _, thresh = cv.threshold(blur, 181, 255, cv.THRESH_TOZERO) #+ cv.THRESH_OTSU)
+# kernel = np.ones((11, 11), np.uint64)
+# opening = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
+# edge = cv.Canny(opening, 99, 100)
+#
+# cnts = cv.findContours(edge, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
+#
+# c = max(cnts, key=cv.contourArea)
+#
+# x, y, w, h = cv.boundingRect(c)
+#
+# crop = img[y:y+h, x:x+w].copy()
+#
+# cv.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+#
+# corners = cv.goodFeaturesToTrack(gray, 25, 0.1, 50)
+# corners = np.int64(corners)
+#
+# for i in corners:
+#     x, y = i.ravel()
+#     cv.circle(crop, (x, y), 3, 255, -1)
+#
+# cv.imshow('img', img)
+# cv.imshow('crop', crop)
+# cv.imshow('thresh', thresh)
+# cv.imshow('edge', edge)
+# cv.waitKey(0)
 
-img = cv.resize(img_path, None, fx=0.25, fy=0.25)
+'''document scanner https://pyimagesearch.com/2014/09/01/build-kick-ass-mobile-document-scanner-just-5-minutes/
+https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/'''
 
-gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+image = cv.imread(r'C:\Users\magnu\PycharmProjects\MED3_ProjektGit\fishImages\doubleFish\dFish1_21.jpg')
 
-blur = cv.GaussianBlur(gray, (9, 9), 0)
-_, thresh = cv.threshold(blur, 160, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
-kernel = np.ones((11, 11), np.uint64)
-opening = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
-edge = cv.Canny(opening, 99, 100)
+ratio = image.shape[0] / 500.0
+orig = image.copy()
+image = imutils.resize(image, height = 500)
 
-cnts = cv.findContours(opening, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)[-2]
+# convert the image to grayscale, blur it, and find edges
+# in the image
+gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+gray = cv.GaussianBlur(gray, (5, 5), 0)
+edged = cv.Canny(gray, 75, 200)
 
-c = max(cnts, key=cv.contourArea)
+# find the contours in the edged image, keeping only the
+# largest ones, and initialize the screen contour
+cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+cnts = imutils.grab_contours(cnts)
+cnts = sorted(cnts, key = cv.contourArea, reverse = True)[:5]
 
-x, y, w, h = cv.boundingRect(c)
+# loop over the contours
+for c in cnts:
+	# approximate the contour
+	peri = cv.arcLength(c, True)
+	approx = cv.approxPolyDP(c, 0.02 * peri, True)
 
-crop = img[y:y+h, x:x+w].copy()
+	# if our approximated contour has four points, then we
+	# can assume that we have found our screen
+	if len(approx) == 4:
+		screenCnt = approx
+		break
 
-cv.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+def order_points(pts):
+	# initialzie a list of coordinates that will be ordered
+	# such that the first entry in the list is the top-left,
+	# the second entry is the top-right, the third is the
+	# bottom-right, and the fourth is the bottom-left
+	rect = np.zeros((4, 2), dtype = "float32")
+	# the top-left point will have the smallest sum, whereas
+	# the bottom-right point will have the largest sum
+	s = pts.sum(axis = 1)
+	rect[0] = pts[np.argmin(s)]
+	rect[2] = pts[np.argmax(s)]
+	# now, compute the difference between the points, the
+	# top-right point will have the smallest difference,
+	# whereas the bottom-left will have the largest difference
+	diff = np.diff(pts, axis = 1)
+	rect[1] = pts[np.argmin(diff)]
+	rect[3] = pts[np.argmax(diff)]
+	# return the ordered coordinates
+	return rect
 
-corners = cv.goodFeaturesToTrack(gray, 100, 0.01, 495)
-corners = np.int64(corners)
+def four_point_transform(image, pts):
+	# obtain a consistent order of the points and unpack them
+	# individually
+	rect = order_points(pts)
+	(tl, tr, br, bl) = rect
+	# compute the width of the new image, which will be the
+	# maximum distance between bottom-right and bottom-left
+	# x-coordiates or the top-right and top-left x-coordinates
+	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+	maxWidth = max(int(widthA), int(widthB))
+	# compute the height of the new image, which will be the
+	# maximum distance between the top-right and bottom-right
+	# y-coordinates or the top-left and bottom-left y-coordinates
+	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+	maxHeight = max(int(heightA), int(heightB))
+	# now that we have the dimensions of the new image, construct
+	# the set of destination points to obtain a "birds eye view",
+	# (i.e. top-down view) of the image, again specifying points
+	# in the top-left, top-right, bottom-right, and bottom-left order
+	dst = np.array([
+		[0, 0],
+		[maxWidth - 1, 0],
+		[maxWidth - 1, maxHeight - 1],
+		[0, maxHeight - 1]], dtype = "float32")
+	# compute the perspective transform matrix and then apply it
+	M = cv.getPerspectiveTransform(rect, dst)
+	warped = cv.warpPerspective(image, M, (maxWidth, maxHeight))
+	# return the warped image
+	return warped
 
-for i in corners:
-    x, y = i.ravel()
-    cv.circle(crop, (x, y), 3, 255, -1)
+warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
+# show the original image and the edge detected image
+print("STEP 1: Edge Detection")
+cv.imshow("Image", image)
+cv.imshow("Edged", edged)
+cv.waitKey(0)
+cv.destroyAllWindows()
 
-cv.imshow('img', img)
-cv.imshow('crop', crop)
-cv.imshow('thresh', opening)
-cv.imshow('edge', edge)
+# show the contour (outline) of the piece of paper
+print("STEP 2: Find contours of paper")
+cv.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
+cv.imshow("Outline", image)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+cv.imshow("Original", imutils.resize(orig, height = 650))
+cv.imshow("Scanned", imutils.resize(warped, height = 650))
 cv.waitKey(0)

@@ -175,13 +175,7 @@ def dominant_angle_from_lines(img):
 
     print(f"Detected dominant edge angle: {dominant_angle:.2f}°")
 
-    # Rotate image to make edges vertical (optional)
-    '''height, width = image.shape[:2]
-    center = (width // 2, height // 2)'''
     correction = dominant_angle - 180
-    '''M = cv2.getRotationMatrix2D(center, correction, 1.0)
-    upright = cv2.warpAffine(img, M, (width, height))'''
-
 
     return correction
 
