@@ -1,9 +1,8 @@
-import cv2
 import numpy as np
 import cv2 as cv
 
 
-original = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\fishImages\fish1\CroppedFish.jpg")
+original = cv.imread(r"C:\Github\MED3_ProjektGit\fishImages\CoppedImages\Skærmbillede 2025-11-18 110014.png")
 
 alpha = 2
 beta = -50
@@ -14,7 +13,7 @@ contrastBrightness = cv.convertScaleAbs(original, alpha=alpha, beta=beta)
 thresholded = cv.threshold(contrastBrightness, 125, 255, cv.THRESH_BINARY)[1]
 
 grayImage = cv.cvtColor(thresholded, cv.COLOR_BGR2GRAY)
-cv2.imshow("grey", grayImage)
+#cv2.imshow("grey", grayImage)
 #sobelx = cv.Sobel(original, cv.CV_64F, 1, 0, ksize=3)
 #sobely = cv.Sobel(original, cv.CV_64F, 0, 1, ksize=3)
 #laplacian = cv.Laplacian(original,cv.CV_64F)
