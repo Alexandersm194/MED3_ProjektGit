@@ -26,8 +26,8 @@
 import cv2 as cv
 import numpy as np
 
-img_path = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\TrainingImages\test3.png")
-img = cv.resize(img_path, None, fx=0.25, fy=0.25)
+# img_path = cv.imread(r"C:\Users\Admin\Documents\GitHub\MED3_ProjektGit\TrainingImages\test3.png")
+# img = cv.resize(img_path, None, fx=0.25, fy=0.25)
 def remove_background(img):
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     H, S, V = cv.split(hsv)
