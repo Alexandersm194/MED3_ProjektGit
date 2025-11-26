@@ -1,10 +1,72 @@
 import cv2
 import numpy as np
-from cv2 import WINDOW_NORMAL
+from cv2 import WINDOW_NORMAL, waitKey, destroyAllWindows
 from matplotlib import pyplot as plt
 
 # Input
-img = cv2.imread(r"C:\Github\MED3_ProjektGit\fishImages\fish3\fish3_42222(cutout).jpg")
+thresh_min = 100
+thresh_max = 255
+
+alphaL = 2  # Simple contrast control
+betaL = 50  # Simple brightness control
+
+alphaD = 2
+betaD = 50
+
+img = cv2.imread(r"C:\Github\MED3_ProjektGit\fishLighter.jpg")
+
+mean_val = np.mean(img)
+print("Average pixel intensity: ", mean_val)
+
+#mean_val2 = np.mean(img)
+#print("Average pixel intensity: ", mean_val2)
+
+new_image = np.zeros(img.shape, img.dtype)
+
+
+if mean_val < thresh_min:
+    picture = cv2.convertScaleAbs(new_image, beta=+betaL)
+else:
+    picture = cv2.convertScaleAbs(new_image, beta=-betaD)
+
+
+cv2.namedWindow("original", cv2.WINDOW_NORMAL)
+cv2.imshow("original", img)
+cv2.namedWindow("result", cv2.WINDOW_NORMAL)
+cv2.imshow("result", picture)
+waitKey(0)
+destroyAllWindows()
+
+
+'''for y in range(img2.shape[0]):
+    for x in range(img2.shape[1]):
+        for c in range(img2.shape[2]):
+            new_image[y, x, c] = np.clip(alpha * img2[y, x, c] + beta, 0, 255)'''
+
+'''
+cv2.namedWindow("org", cv2.WINDOW_NORMAL)
+cv2.imshow("org", img2)
+cv2.namedWindow("orgg", cv2.WINDOW_NORMAL)
+cv2.imshow("orgg", new_image)
+waitKey(0)
+destroyAllWindows()'''
+
+
+#def lightOrDark_img(img):
+
+    #if(imgThresh >= thresh_min )
+
+    #return lightOrDark_img
+
+
+
+
+
+
+
+
+
+
 '''gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(img, (11, 11), 0)
 
@@ -51,7 +113,7 @@ b, g, r = cv2.split(masked)
 rgba = [b,g,r, alpha]
 dst = cv2.merge(rgba,4)'''
 ''''''''''''''''''''
-blur = 17
+'''blur = 17
 canny_low = 50
 canny_high = 200
 min_area_ratio = 0.0005
@@ -95,4 +157,4 @@ masked = (masked * 255).astype('uint8')
 cv2.namedWindow("masked", WINDOW_NORMAL)
 cv2.imshow('masked', masked)
 cv2.imshow('img', img)
-cv2.waitKey(0)
+cv2.waitKey(0)'''
