@@ -10,10 +10,10 @@ from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
-from StartingScripts.BrickEdges import sharpened_img
 
 img = cv.imread("TrainingImages//perspectiveTest4.jpg")
 img = rectify(img)
+
 
 imgOrg = img.copy()
 
