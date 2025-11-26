@@ -85,12 +85,12 @@ colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 # print(len(brick_matrix))
 
 #Feature Extraction And Classification
-for y, row in enumerate(brick_matrix):
-    for x, col in enumerate(row):
-        print(col.shape)
-        cv.imshow(f"{y},{x}", col)
-        cv.waitKey(0)
-        # cv.destroyAllWindows()
+# for y, row in enumerate(brick_matrix):
+#     for x, col in enumerate(row):
+#         print(col.shape)
+#         cv.imshow(f"{y},{x}", col)
+#         cv.waitKey(0)
+#         # cv.destroyAllWindows()
 
 SomethingMatrix = []
 # Brick
