@@ -1,4 +1,3 @@
-import cv2
 import cv2 as cv
 import numpy as np
 import ModelDirection as MD
@@ -35,9 +34,9 @@ whole_blob = remove_background(img)
 blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
 
-cv2.namedWindow("wholeBlob", cv2.WINDOW_NORMAL)
-cv2.imshow("wholeBlob", whole_blob)
-cv2.waitKey(0)
+cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
+cv.imshow("wholeBlob", whole_blob)
+cv.waitKey(0)
 
 #Direction
 dominant_angle = MD.dominant_angle_from_lines(edge)
@@ -50,8 +49,8 @@ rotated_org = MD.rotateImage(figureImg, dominant_angle)
 cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
 cropped_org = rotated_org[y:y + h, x:x + w]
 
-cv2.imshow("Rotated", cropped_bin)
-cv2.waitKey(0)
+cv.imshow("Rotated", cropped_bin)
+cv.waitKey(0)
 
 #FindUp
 isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(blob, whole_blob)
