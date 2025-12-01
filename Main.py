@@ -10,20 +10,18 @@ from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
 
-img = cv.imread("TrainingImages//perspectiveTest4.jpg")
+img = cv.imread("uploads//photo.jpg")
 img = rectify(img)
-
-
 imgOrg = img.copy()
+#figureImg = imgOrg[]
 
-#Pre-Processing
-figureImg = rectify(imgOrg)
-
-'''yIn = img.shape[0] // 7
-xIn = img.shape[1] // 5
-figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]'''
+yIn = img.shape[0] // 4
+xIn = img.shape[1] // 6
+figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+cv.namedWindow("Image", cv.WINDOW_NORMAL)
+cv.namedWindow("Org", cv.WINDOW_NORMAL)
 cv.imshow("Image", img)
-cv.imshow("Original", figureImg)
+cv.imshow("Org", figureImg)
 cv.waitKey(0)
 
 #Background Removal
@@ -53,7 +51,7 @@ cv.imshow("Rotated", cropped_bin)
 cv.waitKey(0)
 
 #FindUp
-isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(blob, whole_blob)
+isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin, whole_blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
 if isUp is False:
@@ -124,16 +122,32 @@ brick = {
 
 brick_matrix = []
 
+patch_size = 10  # Size of the patch to check around the center (3x3)
+threshold = 0.5  # Fraction of pixels that must be black to consider it empty
+
 for y, row in enumerate(colorMatrix):
     new_row = []
     for x, col in enumerate(row):
         newBrick = brick.copy()
         newBrick["color"] = col
 
-        midY = blob_brick_matrix[y][x].shape[0] // 2
-        midX = blob_brick_matrix[y][x].shape[1] // 2
-        if blob_brick_matrix[y][x][midY][midX] == 0:
+        blob = blob_brick_matrix[y][x]
+        h, w = blob.shape
+
+        # Define center patch coordinates
+        midY, midX = h // 2, w // 2
+        y1 = max(midY - patch_size // 2, 0)
+        y2 = min(midY + patch_size // 2 + 1, h)
+        x1 = max(midX - patch_size // 2, 0)
+        x2 = min(midX + patch_size // 2 + 1, w)
+
+        patch = blob[y1:y2, x1:x2]
+
+        # Decide if empty based on patch
+        if np.mean(patch == 0) >= threshold:
             newBrick["isEmpty"] = True
+        else:
+            newBrick["isEmpty"] = False
 
         new_row.append(newBrick)
     brick_matrix.append(new_row)

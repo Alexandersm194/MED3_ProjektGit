@@ -45,20 +45,16 @@ def find_up(crop, ref):
         ref[(hight - hightVar):hight, (width - widthVar):width]
     ]
 
-    for corner in corners:
-        cv2.imshow("Corner", corner)
-        cv2.waitKey(0)
 
 
     corrected_corners = []
 
     for corner in corners:
         corrected_corners.append(removeBorderConnected(corner))
-        cv2.imshow("Corner", removeBorderConnected(corner))
-        cv2.waitKey(0)
 
     figure_cnt = None
     biggest_cnt_area = 0
+    refCorner = None
 
     for crn in corrected_corners:
         contours, _ = cv.findContours(crn, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -68,9 +64,9 @@ def find_up(crop, ref):
             if area > biggest_cnt_area:
                 figure_cnt = contour
                 biggest_cnt_area = area
+                refCorner = crn
 
-
-    cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, crop)
+    cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, refCorner)
 
     if LegoBrickWidth > LegoBrickHeight:
         LegoBrickWidth, LegoBrickHeight = LegoBrickHeight, LegoBrickWidth
@@ -81,25 +77,69 @@ def find_up(crop, ref):
     LegoBrickCleanHeight = math.floor(LegoBrickHeight * 0.85)
     print(LegoBrickCleanHeight)
     print(LegoBrickWidth)
+    up_brick_kernel = cropped[0:LegoBrickDotHeight, 0:LegoBrickWidth]
+    down_brick_kernel = cv.rotate(up_brick_kernel, cv.ROTATE_180)
 
-    top = 0
+    def get_main_contour(binary_img):
+        # Find all contours
+        contours, _ = cv.findContours(binary_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            return None
+        # Return the largest contour
+        return max(contours, key=cv.contourArea)
+
+    def get_contour_angle(contour):
+        # Get the minimum-area rectangle around the contour
+        rect = cv.minAreaRect(contour)
+        angle = rect[-1]
+        # Adjust the angle to a range of [-90, 90]
+        if angle < -45:
+            angle += 90
+        return angle
+
+    def is_upright(large_img, kernel_up, kernel_down):
+        # Extract main contours
+        cnt_large = get_main_contour(large_img)
+        cnt_up = get_main_contour(kernel_up)
+        cnt_down = get_main_contour(kernel_down)
+
+        if cnt_large is None or cnt_up is None or cnt_down is None:
+            print("One of the contours was not found!")
+            return None
+
+        # Get angles
+        angle_large = get_contour_angle(cnt_large)
+        angle_up = get_contour_angle(cnt_up)
+        angle_down = get_contour_angle(cnt_down)
+
+        # Compare angles to decide uprightness
+        diff_up = abs(angle_large - angle_up)
+        diff_down = abs(angle_large - angle_down)
+
+        print(f"Angle large: {angle_large:.2f}, Angle up: {angle_up:.2f}, Angle down: {angle_down:.2f}")
+        print(f"Diff up: {diff_up:.2f}, Diff down: {diff_down:.2f}")
+
+        return diff_up < diff_down
+
+    isUp = is_upright(crop, up_brick_kernel, down_brick_kernel)
+    print(f"IS UP{isUp}")
+    '''top = 0
     bottom = 0
 
-    for y in range(LegoBrickDotHeight * 5):
+
+    for y in range(LegoBrickDotHeight):
         for x in range(crop.shape[1]):
-            #print(f"Top: {crop[y, x]}")
             if crop[y, x] == 255:
                 top += 1
 
-    for y in range(LegoBrickDotHeight * 5):
+    for y in range(LegoBrickDotHeight):
         bot = crop.shape[0] - y - 1
         for x in range(crop.shape[1]):
-            #print(f"Bottom: {crop[bot, x]}")
             if crop[bot, x] == 255:
                 bottom += 1
 
     print(f"Top: {top}, Bottom: {bottom}")
-    isUp = False if top < bottom else True
+    isUp = False if top > bottom else True'''
     return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth
 
 
@@ -134,6 +174,7 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     nrBricksVertical = (img_h - dotHeight) // brickHeight
 
     print("Detected bricks horizontally:", nrBricksHorizontal)
+    print("Detected bricks vertically:", nrBricksVertical)
 
     for y in range(nrBricksVertical):
         row = []

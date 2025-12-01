@@ -65,7 +65,6 @@ def edge(original):
     thresholded = cv2.threshold(contrastBrightness, 125, 255, cv2.THRESH_BINARY)[1]
 
     grayImage = cv2.cvtColor(thresholded, cv2.COLOR_BGR2GRAY)
-    cv2.imshow("grey", grayImage)
 
     openImage = opening(grayImage, kernel)
     closingImage = closing(grayImage, kernel)
@@ -141,10 +140,7 @@ def brickEdge(img):
 
     bluechannel, _ , _ = cv2.split(inputImg)
     lineThresh = cv2.threshold(bluechannel, 250, 255, cv2.THRESH_BINARY)[1]
-    cv2.namedWindow("edges", cv2.WINDOW_NORMAL)
-    cv2.imshow("edges", lineThresh)
 
-    cv2.waitKey(0)
     return lineThresh, edges
 
 
@@ -159,6 +155,10 @@ def dominant_angle_from_lines(img):
     if lines is None:
         print("No lines found.")
         return None
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     angles = []
     for line in lines:
