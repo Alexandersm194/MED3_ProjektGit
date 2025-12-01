@@ -1,3 +1,6 @@
+sizeMatrices = []
+colorMatrices = []
+
 AlexFig1SizeMatrix = [
     [-1,-1,-1, 2, -1, -1, -1],
     [-1,-1,-1, 2, -1, -1, -1],
@@ -6,6 +9,7 @@ AlexFig1SizeMatrix = [
     [8],
     [4, 4],
     [1, -1, -1, -1, -1, -1, -1, 1],]
+
 
 AlexFig1ColorMatrix = [
     ["empty", "empty" , "empty", "yellow", "yellow", "empty", "empty", "empty"],
@@ -79,3 +83,21 @@ AlexFig4ColorMatrix = [
     ["empty", "blue" , "blue", "blue", "blue", "blue", "blue", "empty"],
     ["empty", "red" , "red", "empty", "empty", "yellow", "yellow", "empty"],
     ["empty", "red" , "red", "empty", "empty", "red", "red", "empty"]]
+
+sizeMatrices.append(AlexFig1SizeMatrix)
+sizeMatrices.append(AlexFig2SizeMatrix)
+sizeMatrices.append(AlexFig3SizeMatrix)
+sizeMatrices.append(AlexFig4SizeMatrix)
+
+colorMatrices.append(AlexFig1ColorMatrix)
+colorMatrices.append(AlexFig2ColorMatrix)
+colorMatrices.append(AlexFig3ColorMatrix)
+colorMatrices.append(AlexFig4ColorMatrix)
+
+
+def brickSizeMatrices():
+    return sizeMatrices
+
+
+def brickColorMatrices():
+    return colorMatrices
