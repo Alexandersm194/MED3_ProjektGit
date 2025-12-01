@@ -155,6 +155,10 @@ def dominant_angle_from_lines(img):
     if lines is None:
         print("No lines found.")
         return None
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     angles = []
     for line in lines:
