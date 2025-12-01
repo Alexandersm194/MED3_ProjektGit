@@ -66,6 +66,7 @@ cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
 #BrickMatrix
+brickWidth -= int(brickWidth*0.1)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
 
