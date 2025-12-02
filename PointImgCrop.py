@@ -46,6 +46,7 @@ def rectify(image, save_debug=False):
     # Fallback: force largest contour into 4 points
     if screenCnt is None:
         print("No 4-point contour found. Forcing approximation...")
+        return orig, False
         forced = force_four_points(cnts[0])
         if forced is None:
             print("Still cannot create 4-point polygon. Returning original image.")
@@ -85,4 +86,4 @@ def rectify(image, save_debug=False):
         cv.drawContours(image, [screenCnt], -1, (0,255,0), 2)
         cv.imwrite("debug_contours.jpg", image)
 
-    return warped
+    return warped, True
