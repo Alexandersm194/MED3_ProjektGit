@@ -27,37 +27,42 @@ def background_removal(image):
     closedPic = cv.morphologyEx(closedPic, cv.MORPH_OPEN, kernel, iterations=3)
     # Vis resultat
     result = cv.bitwise_and(image, image, mask=closedPic)
-    cv.imshow("Maske", closedPic)
-    cv.imshow("Resultat", result)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+
 
     return closedPic, result
 
 def crop_rotated_rect(image, rect):
-    # Get box corner points
-    box = cv.boxPoints(rect)
-    box = np.int8(box)
+    # rect = ((cx, cy), (w, h), angle)
+    box = cv.boxPoints(rect).astype(np.float32)
 
-    # Width and height of the rect
-    W = int(rect[1][0])
-    H = int(rect[1][1])
+    # Order points (TL, TR, BR, BL)
+    def order_points(pts):
+        s = pts.sum(axis=1)
+        diff = np.diff(pts, axis=1)
 
-    # Destination points for the perspective transform
-    dst_pts = np.array([
-        [0, H-1],
+        ordered = np.zeros((4, 2), dtype="float32")
+        ordered[0] = pts[np.argmin(s)]      # top-left
+        ordered[2] = pts[np.argmax(s)]      # bottom-right
+        ordered[1] = pts[np.argmin(diff)]   # top-right
+        ordered[3] = pts[np.argmax(diff)]   # bottom-left
+        return ordered
+
+    src = order_points(box)
+
+    # Compute width and height from the actual rotated box
+    W = int(np.linalg.norm(src[0] - src[1]))
+    H = int(np.linalg.norm(src[0] - src[3]))
+
+    # Destination points that preserve orientation exactly
+    dst = np.array([
         [0, 0],
-        [W-1, 0],
-        [W-1, H-1]
+        [W, 0],
+        [W, H],
+        [0, H]
     ], dtype="float32")
 
-    # Order box points consistently
-    src_pts = box.astype("float32")
-
-    # Get the perspective transform matrix
-    M = cv.getPerspectiveTransform(src_pts, dst_pts)
-
-    # Warp (crop) the image
+    # Compute transform and warp
+    M = cv.getPerspectiveTransform(src, dst)
     warped = cv.warpPerspective(image, M, (W, H))
 
     return warped, W, H

@@ -58,8 +58,6 @@ def visualizeMatrix(matrix):
             row.append(createBars(matrix[i][j]))
         bars.append(np.hstack(row))
     image = np.concatenate(bars, axis=0)
-    cv.imshow('colors', image)
-    cv.waitKey(0)
     return image
 
 # connect colors
