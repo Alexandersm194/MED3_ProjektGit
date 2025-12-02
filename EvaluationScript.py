@@ -162,7 +162,7 @@ def imageProcess(img):
 
     print(final_brick_matrix)
 
-imageDir = "TestImagesV1"
+imageDir = "TestImages//Lighting//Diffused"
 testImages = []
 
 if os.path.isdir(imageDir):
@@ -177,6 +177,18 @@ if os.path.isdir(imageDir):
 else:
     print("This is not a functional path!")
 
+SuccesfullRect = 0
+FailRect = 0
+for img in testImages:
+    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    cv2.imshow("Image", img)
+    cv2.waitKey(0)
+    rect, success = rectify(img)
+    if success:
+        SuccesfullRect += 1
+    else:
+        FailRect += 1
+    cv2.imshow("Image", rect)
+    cv2.waitKey(0)
 
-
-
+print(f"Succesfull: {SuccesfullRect}, Fail: {FailRect}")
