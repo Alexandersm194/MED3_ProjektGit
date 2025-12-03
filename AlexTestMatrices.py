@@ -58,7 +58,6 @@ AlexFig3ColorMatrix = [
     ["empty", "red" , "red", "red", "red", "red", "red", "empty"],
     ["empty", "red" , "red", "red", "red", "red", "red", "empty"],
     ["blue", "blue" , "blue", "blue", "blue", "blue", "blue", "blue"],
-    ["empty", "empty" , "empty", "red", "red", "empty", "empty", "empty"],
     ["empty", "empty" , "red", "red", "red", "red", "empty", "empty"]]
 
 
