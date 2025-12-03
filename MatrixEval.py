@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+
 import ModelDirection as MD
 import Matrix
 import Segmentation
@@ -134,9 +135,38 @@ for y in range(len(colorMatrix)):
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
 
-cv.imshow("colorMatrix", colorMatrixImg)
+cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
+a = True
+while a:
+    print("how much to rotate clockwise?")
+    rotation = input("type 0, 90, 180, or 270")
+    if rotation == "0":
+        rotation = 0
+        a = False
+    if rotation == "90":
+        rotation = 3
+        a = False
+    if rotation == "180":
+        rotation = 2
+        a = False
+    if rotation == "270":
+        rotation = 1
+        a = False
+
+if rotation == 3:
+    print("rotating 90")
+    np.rot90(colorMatrix, 3)
+if rotation == 2:
+    print("rotating 180")
+    np.rot90(colorMatrix, 2)
+if rotation == 1:
+    print("rotating 270")
+    np.rot90(colorMatrix, 1)
+
+print(colorMatrix)
+cv.imshow("color", colorMatrixImg)
 def brickColor(color):
     brick = np.zeros((100, 75, 3), np.uint8)  # zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
     brick[:] = color  # assigns color value to each element in ndarray
