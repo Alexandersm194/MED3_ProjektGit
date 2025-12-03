@@ -58,8 +58,8 @@ PFig4 = [
 
 
 
-TruthFig = AFig2
-img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
+truthFig = AFig1
+img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
 imgOrg = img.copy()
 #figureImg = imgOrg[]
 
@@ -72,11 +72,11 @@ xIn = int(xIn)
 
 #figureImg = imgOrg[:yIn, :xIn]
 figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
-cv.namedWindow("Image", cv.WINDOW_NORMAL)
-cv.namedWindow("Org", cv.WINDOW_NORMAL)
-cv.imshow("Image", img)
-cv.imshow("Org", figureImg)
-cv.waitKey(0)
+# cv.namedWindow("Image", cv.WINDOW_NORMAL)
+# cv.namedWindow("Org", cv.WINDOW_NORMAL)
+# cv.imshow("Image", img)
+# cv.imshow("Org", figureImg)
+# cv.waitKey(0)
 
 #Background Removal
 '''whole_blob = Segmentation.background_removal(img)[0]
@@ -86,9 +86,9 @@ whole_blob = remove_background(img)
 blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
 
-cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
-cv.imshow("wholeBlob", whole_blob)
-cv.waitKey(0)
+# cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
+# cv.imshow("wholeBlob", whole_blob)
+# cv.waitKey(0)
 
 #Direction
 dominant_angle = MD.dominant_angle_from_lines(edge)
@@ -101,8 +101,8 @@ rotated_org = MD.rotateImage(figureImg, dominant_angle)
 cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
 cropped_org = rotated_org[y:y + h, x:x + w]
 
-cv.imshow("Rotated", cropped_bin)
-cv.waitKey(0)
+# cv.imshow("Rotated", cropped_bin)
+# cv.waitKey(0)
 
 #FindUp
 isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin, whole_blob)
@@ -112,9 +112,9 @@ if isUp is False:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
     corrected_img = MD.rotateImage(corrected_img, 180)
 
-cv.imshow("corrected BINARY", corrected_img_bin)
-cv.imshow("corrected", corrected_img)
-cv.waitKey(0)
+# cv.imshow("corrected BINARY", corrected_img_bin)
+# cv.imshow("corrected", corrected_img)
+# cv.waitKey(0)
 
 #BrickMatrix
 brickWidth += int(brickHeight*0.05) #changing brickWidth fixes cropping on this model but will not work with other models
@@ -133,16 +133,46 @@ for y in range(len(colorMatrix)):
 
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
-if len(colorMatrix) == len(TruthFig):
+if len(colorMatrix) == len(truthFig):
     print("same height yipppeeee")
+    equalHeight = True
 else:
-    print("height is ", len(colorMatrix) - len(TruthFig), " bricks off")
+    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
+    equalHeight = False
 
-if len(colorMatrix[0]) == len(TruthFig[0]):
+if len(colorMatrix[0]) == len(truthFig[0]):
     print("same width yipppeeee")
+    equalWidth = True
 else:
-    print("width is ", len(colorMatrix[0]) - len(TruthFig[0]), " bricks off")
+    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
+    equalWidth = False
 
 
 cv.imshow("colorMatrix", colorMatrixImg)
 cv.waitKey(0)
+
+def brickColor(color):
+    brick = np.zeros((100, 75, 3), np.uint8)  # zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
+    brick[:] = color  # assigns color value to each element in ndarray
+    return brick
+
+if equalWidth and equalHeight:
+    for y in range(len(colorMatrix)):
+        for x in range(len(colorMatrix[y])):
+            brick = brickColor(colorMatrix[y][x])
+            cv.imshow("brick", brick)
+            cv.waitKey(1)
+            # print("is this color ", truthFig[y][x], "?")
+            # answer = raw_input("y/n")
+
+            # a = True
+            # while a == True:
+            #     b = input("Enter a number:")
+            #     try:
+            #         b = float(b)
+            #         a = False
+            #     except:
+            #         print("Wrong input, please try again.")
+            #
+            # print("Thank you!")
+            # cv.destroyAllWindows()
