@@ -10,13 +10,19 @@ from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
 
-img = cv.imread("uploads//photo.jpg")
-img = rectify(img)
+img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
+#img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
 
-yIn = img.shape[0] // 4
-xIn = img.shape[1] // 6
+yIn = img.shape[0] / 5.4
+xIn = img.shape[1] / 8
+
+# convert to integers for cropping
+yIn = int(yIn)
+xIn = int(xIn)
+
+#figureImg = imgOrg[:yIn, :xIn]
 figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
 cv.namedWindow("Image", cv.WINDOW_NORMAL)
 cv.namedWindow("Org", cv.WINDOW_NORMAL)
