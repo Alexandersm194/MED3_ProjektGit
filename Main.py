@@ -1,3 +1,4 @@
+import cv2
 import cv2 as cv
 import numpy as np
 import ModelDirection as MD
@@ -9,8 +10,10 @@ from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
+from BrickClassifier import classify_brick_hist
+from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
 
-img = cv.imread("TestImages/Angle/0 degrees/LFig2.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -74,15 +77,27 @@ brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHe
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
 
 colorMatrix = []
+tHist = trained_histograms()
 for y, row in enumerate(brick_matrix):
     rows = []
     for x, col in enumerate(row):
-        rows.append(DominantColorsFun(col))
+        # Get all cluster colors
+        clusters = DominantColorsFun(col)
+        if not isinstance(clusters, list):
+            clusters = [clusters]
+
+        # Convert clusters to normalized HSV histogram
+        hist = clusters_to_hist(clusters)
+
+        # Classify brick based on trained histograms
+        predicted_color = classify_brick_hist(hist, tHist)
+
+        rows.append(predicted_color)
     colorMatrix.append(rows)
 
 for y in range(len(colorMatrix)):
     print(colorMatrix[y])
-
+cv2.waitKey(0)
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
 cv.imshow("colorMatrix", colorMatrixImg)
