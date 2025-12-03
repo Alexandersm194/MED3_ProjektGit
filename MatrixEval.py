@@ -133,20 +133,6 @@ for y in range(len(colorMatrix)):
 
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
-if len(colorMatrix) == len(truthFig):
-    print("same height yipppeeee")
-    equalHeight = True
-else:
-    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
-    equalHeight = False
-
-if len(colorMatrix[0]) == len(truthFig[0]):
-    print("same width yipppeeee")
-    equalWidth = True
-else:
-    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
-    equalWidth = False
-
 
 cv.imshow("colorMatrix", colorMatrixImg)
 cv.waitKey(0)
@@ -158,7 +144,7 @@ def brickColor(color):
 
 correct = 0
 incorrect = 0
-if equalWidth and equalHeight:
+if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0]):
     for y in range(len(colorMatrix)):
         for x in range(len(colorMatrix[y])):
             brick = brickColor(colorMatrix[y][x])
@@ -186,3 +172,13 @@ if equalWidth and equalHeight:
                 incorrect += 1
 print("correct:", correct)
 print("incorrect:", incorrect)
+
+if len(colorMatrix) == len(truthFig):
+    print("same height")
+else:
+    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
+
+if len(colorMatrix[0]) == len(truthFig[0]):
+    print("same width")
+else:
+    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
