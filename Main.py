@@ -10,7 +10,7 @@ from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -84,6 +84,9 @@ for y in range(len(colorMatrix)):
     print(colorMatrix[y])
 
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
+
+cv.imshow("colorMatrix", colorMatrixImg)
+cv.waitKey(0)
 
 # print(colorMatrix)
 # print(len(brick_matrix))
