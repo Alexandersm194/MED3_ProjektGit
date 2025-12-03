@@ -57,6 +57,8 @@ PFig4 = [
     ["empty", "empty", "empty", "black", "black", "black", "black", "black", "black", "black", "black", "empty", "empty", "empty"] ]
 
 
+
+TruthFig = AFig2
 img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -131,15 +133,15 @@ for y in range(len(colorMatrix)):
 
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
-if len(colorMatrix) == len(AFig2):
+if len(colorMatrix) == len(TruthFig):
     print("same height yipppeeee")
 else:
-    print("height is ", len(colorMatrix) - len(AFig2), " bricks off")
+    print("height is ", len(colorMatrix) - len(TruthFig), " bricks off")
 
-if len(colorMatrix[0]) == len(AFig2[0]):
+if len(colorMatrix[0]) == len(TruthFig[0]):
     print("same width yipppeeee")
 else:
-    print("width is ", len(colorMatrix[0]) - len(AFig2[0]), " bricks off")
+    print("width is ", len(colorMatrix[0]) - len(TruthFig[0]), " bricks off")
 
 
 cv.imshow("colorMatrix", colorMatrixImg)
