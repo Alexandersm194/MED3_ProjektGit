@@ -10,7 +10,7 @@ from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/LFig2.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]

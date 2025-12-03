@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="sdkName" value="firstEnviroment" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="opencv" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="firstEnviroment" project-jdk-type="Python SDK" />
   <component name="PyCharmProfessionalAdvertiser">
     <option name="shown" value="true" />
   </component>

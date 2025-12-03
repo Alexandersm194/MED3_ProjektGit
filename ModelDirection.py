@@ -175,7 +175,7 @@ def dominant_angle_from_lines(img):
 
     print(f"Detected dominant edge angle: {dominant_angle:.2f}°")
 
-    correction = dominant_angle - 180
+    correction = dominant_angle
 
     return correction
 
