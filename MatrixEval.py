@@ -160,19 +160,19 @@ if equalWidth and equalHeight:
     for y in range(len(colorMatrix)):
         for x in range(len(colorMatrix[y])):
             brick = brickColor(colorMatrix[y][x])
-            cv.imshow("brick", brick)
-            cv.waitKey(1)
+            cv.imshow(str(x), brick)
+            cv.waitKey(50)
             # print("is this color ", truthFig[y][x], "?")
-            # answer = raw_input("y/n")
+            # answer = input("y/n")
 
-            # a = True
-            # while a == True:
-            #     b = input("Enter a number:")
-            #     try:
-            #         b = float(b)
-            #         a = False
-            #     except:
-            #         print("Wrong input, please try again.")
-            #
-            # print("Thank you!")
+            a = True
+            while a:
+                b = input("Enter a number:")
+                try:
+                    b = float(b)
+                    a = False
+                except:
+                    print("Wrong input, please try again.")
+
+            print("Thank you!")
             # cv.destroyAllWindows()
