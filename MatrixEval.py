@@ -156,23 +156,33 @@ def brickColor(color):
     brick[:] = color  # assigns color value to each element in ndarray
     return brick
 
+correct = 0
+incorrect = 0
 if equalWidth and equalHeight:
     for y in range(len(colorMatrix)):
         for x in range(len(colorMatrix[y])):
             brick = brickColor(colorMatrix[y][x])
             cv.imshow(str(x), brick)
             cv.waitKey(50)
+            cv.destroyWindow(str(x - 1))
             # print("is this color ", truthFig[y][x], "?")
             # answer = input("y/n")
 
             a = True
+            b = ""
             while a:
-                b = input("Enter a number:")
-                try:
-                    b = float(b)
-                    a = False
-                except:
-                    print("Wrong input, please try again.")
+                print("is this color ", truthFig[y][x], "?")
+                b = input("y/n")
 
-            print("Thank you!")
-            # cv.destroyAllWindows()
+                if b == "y" or b == "n":
+                    print(b)
+                    a= False
+                else:
+                    print("Invalid input, please try again.")
+
+            if b == "y":
+                correct += 1
+            if b == "n":
+                incorrect += 1
+print("correct:", correct)
+print("incorrect:", incorrect)
