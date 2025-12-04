@@ -3,13 +3,14 @@ import numpy as np
 import Segmentation
 def assign_boxes_by_center(sorted_boxes,
                            nrBricksVertical, nrBricksHorizontal,
-                           brickHeight, brickWidth, dotHeight=0):
+                           brickHeight, brickWidth, dotHeight=0,
+                           center_bias_x=0.45):
 
-    # allocate empty grid
+    # Allocate empty grid
     grid = [[None for _ in range(nrBricksHorizontal)]
-                    for _ in range(nrBricksVertical)]
+            for _ in range(nrBricksVertical)]
 
-    used = set()   # prevent multi-assignment of same blob
+    used = set()  # prevent multi-assignment of same box
 
     for row in sorted_boxes:
         for box in row:
@@ -18,35 +19,34 @@ def assign_boxes_by_center(sorted_boxes,
 
             x, y, w, h = box
 
-            cx = x + w / 2
+            # Compute biased center (shift left)
+            cx = x + w * (0.5 - center_bias_x)
             cy = y + h / 2
 
-            # compute grid location
+            # Compute grid location
             grid_y = int((cy - dotHeight) // brickHeight)
             grid_x = int(cx // brickWidth)
 
-            # check boundaries
+            # Check boundaries
             if not (0 <= grid_y < nrBricksVertical):
                 continue
             if not (0 <= grid_x < nrBricksHorizontal):
                 continue
 
-            # only assign if the cell is empty
+            # Only assign if the cell is empty
             if grid[grid_y][grid_x] is None:
                 grid[grid_y][grid_x] = box
                 used.add(box)
             else:
-                # collision: choose the closest box
+                # Collision: choose box whose center is closer to cell center
                 prev_box = grid[grid_y][grid_x]
-
-                # compute which center is closer to the cell center
                 cell_center_x = grid_x * brickWidth + brickWidth / 2
                 cell_center_y = grid_y * brickHeight + dotHeight + brickHeight / 2
 
                 cx_prev = prev_box[0] + prev_box[2] / 2
                 cy_prev = prev_box[1] + prev_box[3] / 2
 
-                dist_new  = (cx - cell_center_x)**2 + (cy - cell_center_y)**2
+                dist_new = (cx - cell_center_x)**2 + (cy - cell_center_y)**2
                 dist_prev = (cx_prev - cell_center_x)**2 + (cy_prev - cell_center_y)**2
 
                 if dist_new < dist_prev:
@@ -56,7 +56,6 @@ def assign_boxes_by_center(sorted_boxes,
                     used.add(prev_box)
 
     return grid
-
 def sort_bricks_grid(brick_boxes, brick_images):
     boxes = np.array(brick_boxes)
 
