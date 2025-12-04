@@ -50,6 +50,131 @@ AFig4 = [
     ["empty", "red" , "red", "empty", "empty", "yellow", "yellow", "empty"],
     ["empty", "red" , "red", "empty", "empty", "red", "red", "empty"]]
 
+JFig1 = [
+    ["empty", "empty" , "empty", "yellow", "yellow", "empty", "empty", "empty"],
+    ["empty", "yellow" , "empty", "blue", "blue", "empty", "yellow", "empty"],
+    ["empty", "brown" , "brown", "brown", "blue", "blue", "blue", "empty"],
+    ["blue", "blue" , "blue", "blue", "blue", "blue", "blue", "blue"],
+    ["empty", "red" , "red", "red", "red", "red", "red", "empty"],
+    ["empty", "empty" , "orange", "orange", "orange", "orange", "empty", "empty"],
+    ["lightGreen", "lightGreen" , "lightGreen", "lightGreen", "yellow", "yellow", "yellow", "yellow"],
+    ["orange", "orange" , "empty", "empty", "empty", "empty", "red", "red"]]
+
+JFig2 = [
+    ["empty", "empty" , "empty", "empty", "empty", "lightBrown", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "empty", "darkGreen", "darkGreen", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "orange", "orange", "yellow", "yellow", "empty", "empty", "empty"],
+    ["empty", "empty" , "red", "red", "red", "red", "red", "red", "empty", "empty"],
+    ["empty", "empty" , "empty", "yellow", "yellow", "orange", "orange", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "darkBlue", "darkBlue", "darkBlue", "darkBlue", "empty", "empty", "empty"],
+    ["yellow", "yellow", "yellow", "yellow", "empty", "empty", "yellow", "yellow", "yellow", "yellow"],
+    ["empty", "lightBrown", "lightBrown", "empty", "empty", "empty", "empty", "black", "black", "empty"]
+]
+
+JFig3 = [
+    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty" ],
+    ["empty", "empty", "empty", "empty", "orange", "orange", "orange", "orange", "empty", "empty", "empty", "empty" ],
+    ["empty", "empty", "empty", "red", "red", "red", "red", "red", "red", "empty", "empty", "empty" ],
+    ["empty", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "empty" ],
+    ["darkBlue", "darkBlue", "darkBlue", "darkBlue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue" ],
+    ["brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown" ],
+    ["brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown", "brown" ],
+    ["empty", "brown", "brown", "brown", "empty", "empty", "empty", "empty", "brown", "brown", "brown", "empty" ]]
+
+JFig4 = [
+    ["empty", "empty" , "empty", "empty", "empty", "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+    ["blue", "empty" , "empty", "empty", "empty", "empty", "darkBlue", "darkBlue", "darkBlue", "darkBlue", "empty", "empty", "empty", "empty", "empty", "lightBrown"],
+    ["blue", "blue" , "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue"],
+    ["yellow", "empty" , "empty", "empty", "empty", "empty", "brown", "brown", "brown", "brown", "empty", "empty", "empty", "empty", "empty", "yellow"],
+    ["empty", "empty" , "empty", "empty", "empty", "blue", "blue", "blue", "blue", "blue", "empty", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "empty", "red", "red", "red", "red", "red", "red", "red", "red", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "empty", "empty", "empty", "orange", "orange", "orange", "orange", "empty", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "empty", "empty", "empty", "empty", "orange", "orange", "empty", "empty", "empty", "empty", "empty", "empty", "empty"],]
+
+LFig1 = [
+    ["yellow", "red" , "red", "red", "red", "black", "black", "red", "red", "orange", "orange", "yellow", "yellow", "yellow", "yellow", "yellow"],
+    ["blue", "blue" , "red", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "lime", "lime", "blue", "blue", "blue", "blue", "yellow"],
+    ["red", "red" , "red", "red", "yellow", "red", "red", "blue", "blue", "yellow", "yellow", "yellow", "yellow", "orange", "red", "red"],
+    ["red", "red" , "red", "red", "red", "red", "blue", "blue", "blue", "blue", "black", "black", "black", "black", "black", "black"],
+    ["red", "red" , "red", "red", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "dark green", "dark green", "dark green", "dark green"],
+    ["red", "red" , "red", "red", "red", "red", "red", "red", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow"] ]
+
+LFig2 = [
+    ["empty", "empty" , "yellow", "empty", "empty", "empty", "empty", "empty", "empty", "yellow", "empty", "empty"],
+    ["empty", "empty" , "red", "red", "empty", "yellow", "yellow", "empty", "red", "red", "empty", "empty"],
+    ["empty", "empty" , "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "empty", "empty"],
+    ["orange", "empty" , "empty", "black", "black", "black", "black", "black", "black", "empty", "empty", "red"],
+    ["red", "red" , "red", "red", "blue", "blue", "blue", "blue", "red", "red", "red", "red"],
+    ["empty", "empty" , "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "empty", "empty"],
+    ["empty", "empty" , "red", "red", "empty", "red", "red", "empty", "red", "red", "empty", "empty"] ]
+
+LFig3 = [
+    ["empty", "empty" , "empty", "empty", "empty", "orange", "orange", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "empty" , "empty", "yellow", "yellow", "yellow", "red", "red", "red", "empty", "empty", "empty"],
+    ["empty", "dark green", "dark green", "dark green", "dark green", "empty", "empty", "blue", "blue", "blue", "blue", "empty"],
+    ["red", "red" , "red", "red", "empty", "empty", "empty", "empty", "red", "red", "red", "red"],
+    ["empty", "yellow" , "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "yellow", "empty"] ]
+
+LFig4 = [
+    ["empty", "yellow", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "yellow", "empty"],
+    ["empty", "blue", "blue", "empty", "empty", "empty", "empty", "empty", "empty", "blue", "blue", "empty"],
+    ["dark green", "dark green", "dark green", "dark green", "empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow"],
+    ["empty", "empty", "red", "red", "red", "red", "red", "red", "red", "red", "empty", "empty"],
+    ["empty", "empty", "black", "black", "empty", "empty", "empty", "empty", "yellow", "yellow", "empty", "empty"],
+    ["empty", "empty", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "yellow", "empty", "empty", "red", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "blue", "blue", "blue", "blue", "empty", "empty", "empty", "empty"] ]
+
+MFig1 = [
+    ["empty", "empty", "empty", "empty", "empty", "light orange", "yellow", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "dark blue", "dark blue", "dark blue", "dark blue", "black", "black", "black", "black", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"],
+    ["empty", "red", "red", "red", "red", "red", "red", "red", "red", "red", "red", "empty"],
+    ["empty", "empty", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "empty", "empty"],
+    ["black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black"]]
+
+MFig2 = [
+    ["empty", "empty" , "red", "red", "empty", "empty", "dark brown", "dark brown", "empty", "empty"],
+    ["empty", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "empty"],
+    ["light brown", "light brown" , "empty", "dark blue", "dark blue", "dark blue", "dark blue", "empty", "light brown", "light brown"],
+    ["empty", "blue" , "blue", "blue", "blue", "blue", "blue", "blue", "blue", "empty"],
+    ["empty", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "empty"]]
+
+MFig3 = [
+    ["light orange", "light brown" , "empty", "light brown", "yellow", "empty", "yellow", "yellow"],
+    ["blue", "blue" , "blue", "blue", "blue", "blue", "blue", "blue"],
+    ["empty", "yellow" , "yellow", "yellow", "yellow", "yellow", "yellow", "empty"],
+    ["empty", "orange" , "orange", "orange", "orange", "blue", "blue", "empty"],
+    ["red", "red" , "red", "red", "red", "red", "black", "black"]]
+
+MFig4 = [
+    ["empty", "empty", "empty", "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "red", "red", "red", "red", "empty", "empty", "empty","empty"],
+    ["empty", "empty", "empty", "empty", "blue", "blue", "blue", "blue", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "black", "black", "black", "black", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"],
+    ["black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black"],
+    ["empty", "empty", "red", "red", "red", "red", "light orange", "light orange", "light orange", "light orange", "empty", "empty"]]
+
+PFig1 = [
+    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "blue", "blue", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
+    ["empty", "empty", "empty", "red", "red", "red", "red", "red", "red", "empty", "empty", "empty"],
+    ["red", "red", "red", "red", "blue", "blue", "blue", "blue", "red", "red", "red", "red"],
+    ["empty", "empty", "empty", "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty", "empty"] ]
+
+PFig2 = [
+    ["empty", "lime", "lime", "yellow", "yellow", "empty"],
+    ["empty", "red", "red", "red", "red", "empty"],
+    ["black", "black", "black", "black", "yellow", "yellow"],
+    ["blue", "blue", "blue", "blue", "blue", "blue"] ]
+
+PFig3 = [
+    ["empty", "empty", "empty", "empty", "empty", "red", "red", "red", "empty", "empty", "empty", "empty"],
+    ["empty", "red", "red", "black", "black", "black", "black", "black", "black", "black", "black", "empty"],
+    ["empty", "black", "black", "red", "red", "red", "red", "black", "black", "black", "black", "empty"],
+    ["red", "red", "red", "red", "red", "red", "red", "red", "red", "red", "red", "red"] ]
+
 PFig4 = [
     ["empty", "empty", "empty", "empty", "yellow", "yellow", "empty", "empty", "yellow", "yellow", "empty", "empty", "empty", "empty"],
     ["empty", "empty", "empty", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
@@ -129,10 +254,8 @@ for y, row in enumerate(brick_matrix):
         rows.append(DominantColorsFun(col))
     colorMatrix.append(rows)
 
-for y in range(len(colorMatrix)):
-    print(colorMatrix[y])
-
-colorMatrixImg, colorMatrix = connectColors(colorMatrix)
+# for y in range(len(colorMatrix)):
+#     print(colorMatrix[y])
 
 
 cv.imshow("corrected", corrected_img)
@@ -157,20 +280,39 @@ while a:
 
 if rotation == 3:
     print("rotating 90")
-    np.rot90(colorMatrix, 3)
+    colorMatrix = np.rot90(colorMatrix, 3)
 if rotation == 2:
     print("rotating 180")
-    np.rot90(colorMatrix, 2)
+    colorMatrix = np.rot90(colorMatrix, 2)
 if rotation == 1:
     print("rotating 270")
-    np.rot90(colorMatrix, 1)
+    colorMatrix = np.rot90(colorMatrix, 1)
 
-print(colorMatrix)
+colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 cv.imshow("color", colorMatrixImg)
+
 def brickColor(color):
     brick = np.zeros((100, 75, 3), np.uint8)  # zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
     brick[:] = color  # assigns color value to each element in ndarray
     return brick
+
+if len(colorMatrix) == len(truthFig):
+    print("same height")
+else:
+    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
+
+if len(colorMatrix[0]) == len(truthFig[0]):
+    print("same width")
+else:
+    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
+
+
+while len(colorMatrix) > len(truthFig):
+    colorMatrix = colorMatrix[:-1]
+
+while len(colorMatrix[0]) > len(truthFig[0]):
+    for i in colorMatrix:
+        colorMatrix = colorMatrix[:,:-1]
 
 correct = 0
 incorrect = 0
@@ -202,13 +344,3 @@ if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0])
                 incorrect += 1
 print("correct:", correct)
 print("incorrect:", incorrect)
-
-if len(colorMatrix) == len(truthFig):
-    print("same height")
-else:
-    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
-
-if len(colorMatrix[0]) == len(truthFig[0]):
-    print("same width")
-else:
-    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
