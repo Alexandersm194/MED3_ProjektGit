@@ -157,7 +157,7 @@ MFig4 = [
     ["empty", "empty", "red", "red", "red", "red", "light orange", "light orange", "light orange", "light orange", "empty", "empty"]]
 
 PFig1 = [
-    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"]
+    ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"],
     ["empty", "empty", "empty", "blue", "blue", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
     ["empty", "empty", "empty", "red", "red", "red", "red", "red", "red", "empty", "empty", "empty"],
     ["red", "red", "red", "red", "blue", "blue", "blue", "blue", "red", "red", "red", "red"],
@@ -296,6 +296,24 @@ def brickColor(color):
     brick[:] = color  # assigns color value to each element in ndarray
     return brick
 
+if len(colorMatrix) == len(truthFig):
+    print("same height")
+else:
+    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
+
+if len(colorMatrix[0]) == len(truthFig[0]):
+    print("same width")
+else:
+    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
+
+
+while len(colorMatrix) > len(truthFig):
+    colorMatrix = colorMatrix[:-1]
+
+while len(colorMatrix[0]) > len(truthFig[0]):
+    for i in colorMatrix:
+        colorMatrix = colorMatrix[:,:-1]
+
 correct = 0
 incorrect = 0
 if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0]):
@@ -326,13 +344,3 @@ if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0])
                 incorrect += 1
 print("correct:", correct)
 print("incorrect:", incorrect)
-
-if len(colorMatrix) == len(truthFig):
-    print("same height")
-else:
-    print("height is ", len(colorMatrix) - len(truthFig), " bricks off")
-
-if len(colorMatrix[0]) == len(truthFig[0]):
-    print("same width")
-else:
-    print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
