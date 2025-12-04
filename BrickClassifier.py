@@ -1,6 +1,32 @@
 import cv2
 import numpy as np
 
+brickRatios = []
+
+for i in range(1, 9):
+    brickRatios.append(9.6 / (7.8 * i))
+def classify_brick_size(brick_img):
+    height, width = brick_img.shape[:2]
+
+    ratio = height / width
+
+    best_match_dis = 10
+    best_match = -1
+
+    for index, brick_ratio in enumerate(brickRatios):
+        distance = abs(ratio - brick_ratio)
+        if distance < best_match_dis:
+            best_match_dis = distance
+            best_match = index
+    if best_match == -1:
+        return -1
+    else:
+        size = best_match + 1
+        return size
+
+
+
+
 def classify_brick_hist(hist, trained_histograms, threshold=0.0):
     """
     hist: normalized HSV histogram of one brick

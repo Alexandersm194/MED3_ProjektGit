@@ -1,0 +1,158 @@
+import cv2 as cv
+import numpy as np
+import Segmentation
+def assign_boxes_by_center(sorted_boxes,
+                           nrBricksVertical, nrBricksHorizontal,
+                           brickHeight, brickWidth, dotHeight=0):
+
+    # allocate empty grid
+    grid = [[None for _ in range(nrBricksHorizontal)]
+                    for _ in range(nrBricksVertical)]
+
+    used = set()   # prevent multi-assignment of same blob
+
+    for row in sorted_boxes:
+        for box in row:
+            if box in used:
+                continue  # skip duplicates
+
+            x, y, w, h = box
+
+            cx = x + w / 2
+            cy = y + h / 2
+
+            # compute grid location
+            grid_y = int((cy - dotHeight) // brickHeight)
+            grid_x = int(cx // brickWidth)
+
+            # check boundaries
+            if not (0 <= grid_y < nrBricksVertical):
+                continue
+            if not (0 <= grid_x < nrBricksHorizontal):
+                continue
+
+            # only assign if the cell is empty
+            if grid[grid_y][grid_x] is None:
+                grid[grid_y][grid_x] = box
+                used.add(box)
+            else:
+                # collision: choose the closest box
+                prev_box = grid[grid_y][grid_x]
+
+                # compute which center is closer to the cell center
+                cell_center_x = grid_x * brickWidth + brickWidth / 2
+                cell_center_y = grid_y * brickHeight + dotHeight + brickHeight / 2
+
+                cx_prev = prev_box[0] + prev_box[2] / 2
+                cy_prev = prev_box[1] + prev_box[3] / 2
+
+                dist_new  = (cx - cell_center_x)**2 + (cy - cell_center_y)**2
+                dist_prev = (cx_prev - cell_center_x)**2 + (cy_prev - cell_center_y)**2
+
+                if dist_new < dist_prev:
+                    grid[grid_y][grid_x] = box
+                    used.add(box)
+                else:
+                    used.add(prev_box)
+
+    return grid
+
+def sort_bricks_grid(brick_boxes, brick_images):
+    boxes = np.array(brick_boxes)
+
+    # Sort by Y first → rows
+    sort_y = np.argsort(boxes[:, 1])
+    boxes = boxes[sort_y]
+    images = [brick_images[i] for i in sort_y]
+
+    # Group into rows based on similar Y
+    rows = []
+    current_row = [0]
+    threshold = 20  # adjust depending on spacing
+
+    for i in range(1, len(boxes)):
+        if abs(boxes[i, 1] - boxes[current_row[0], 1]) < threshold:
+            current_row.append(i)
+        else:
+            rows.append(current_row)
+            current_row = [i]
+    rows.append(current_row)
+
+    # Now sort each row by X
+    final_images = []
+    final_boxes = []
+
+    for row in rows:
+        row_sorted = sorted(row, key=lambda i: float(boxes[i][0]))
+
+        # store images
+        final_images.append([images[i] for i in row_sorted])
+
+        # store boxes (converted back to tuples)
+        final_boxes.append([tuple(boxes[i]) for i in row_sorted])
+
+    return final_images, final_boxes
+def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight=0):
+    # 1. Edge removal / mask refinement
+    edge = cv.Canny(corrected_img, 100, 200)
+    edge = cv.dilate(edge, np.ones((10, 10), np.uint8), iterations=2)
+    bricks_mask = corrected_img_bin - edge
+
+    # Morphology clean-up
+    bricks_mask = cv.morphologyEx(bricks_mask, cv.MORPH_OPEN,
+                                  np.ones((40, 40), np.uint8), iterations=1)
+
+    # 2. Find contours
+    cnts, _ = cv.findContours(bricks_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+    brick_images = []
+    brick_boxes = []
+
+    for cnt in cnts:
+        area = cv.contourArea(cnt)
+        if area < 2000:
+            continue
+
+        x, y, w, h = cv.boundingRect(cnt)
+
+        pad = 5
+        x = max(0, x - pad)
+        y = max(0, y - pad)
+        w = min(corrected_img.shape[1] - x, w + pad * 2)
+        h = min(corrected_img.shape[0] - y, h + pad * 2)
+
+        crop = corrected_img[y:y+h, x:x+w].copy()
+
+        brick_images.append(crop)
+        brick_boxes.append((x, y, w, h))
+
+        cv.rectangle(corrected_img, (x,y), (x+w, y+h), (0,255,0), 2)
+
+    cv.imshow("Detected bricks", corrected_img)
+    cv.waitKey(0)
+
+    sorted_images, sorted_boxes = sort_bricks_grid(brick_boxes, brick_images)
+
+    img_h, img_w = corrected_img.shape[:2]
+    nrBricksHorizontal = img_w // brickWidth
+    nrBricksVertical = (img_h - dotHeight) // brickHeight
+
+    # --- assign images by center ---
+    final_grid = [[None for _ in range(nrBricksHorizontal)]
+                  for _ in range(nrBricksVertical)]
+
+    for row_imgs, row_boxes in zip(sorted_images, sorted_boxes):
+        for img, box in zip(row_imgs, row_boxes):
+            if box is None:
+                continue
+
+            x, y, w, h = box
+            cx = x + w / 2
+            cy = y + h / 2
+
+            grid_y = min(int((cy - dotHeight) // brickHeight), nrBricksVertical - 1)
+            grid_x = min(int(cx // brickWidth), nrBricksHorizontal - 1)
+
+            final_grid[grid_y][grid_x] = img
+
+    return final_grid

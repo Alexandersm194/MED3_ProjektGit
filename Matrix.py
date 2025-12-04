@@ -176,7 +176,7 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
     print("Detected bricks horizontally:", nrBricksHorizontal)
     print("Detected bricks vertically:", nrBricksVertical)
 
-    for y in range(nrBricksVertical):
+    '''for y in range(nrBricksVertical):
         row = []
         for x in range(nrBricksHorizontal):
             start_y = y * brickHeight + dotHeight
@@ -192,7 +192,18 @@ def matrix_slice(img, brickHeight, brickWidth, dotHeight=0):
             brickImg = img[start_y:end_y, start_x:end_x]
             row.append(brickImg)
 
-        final_matrix.append(row)
+        final_matrix.append(row)'''
+
+    for y in range(nrBricksVertical):
+        start_y = y * brickHeight + dotHeight
+        end_y = start_y + brickHeight
+
+        brickImg = img[start_y:end_y, 0:img_w]
+
+        brickEdge = cv2.Canny(brickImg, 100, 200)
+        final_matrix.append(brickImg)
+        cv2.imshow("matrix", brickEdge)
+        cv2.waitKey(0)
 
     return final_matrix
 

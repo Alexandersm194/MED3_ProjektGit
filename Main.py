@@ -10,8 +10,9 @@ from DominantColors import DominantColorsFun
 from ColorProcessor import visualizeMatrix, connectColors
 from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
-from BrickClassifier import classify_brick_hist
+from BrickClassifier import classify_brick_hist, classify_brick_size
 from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
+from BrickDetector import brick_detect
 
 img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
 #img = rectify(img)
@@ -70,11 +71,56 @@ if isUp is False:
 cv.imshow("corrected BINARY", corrected_img_bin)
 cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
-
 #BrickMatrix
-brickWidth += int(brickHeight*0.05) #changing brickWidth fixes cropping on this model but will not work with other models
+#brickWidth += int(brickHeight*0.05)
+bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
+
+'''brickMat = []
+for row in bricks:
+    newRow = []
+    for brick in row:
+        if(brick is not None):
+            newRow.append(1)
+            cv.imshow("brick", brick)
+            cv.waitKey(0)
+        else:
+            newRow.append(0)
+
+    brickMat.append(newRow)'''
+
+brickDic = {
+    "size": 0,
+    "color": "unknown"
+}
+tHist = trained_histograms()
+finalBrickMat = []
+for row in bricks:
+    newRow = []
+    for brick in row:
+        if(brick is not None):
+            newBrick = brickDic.copy()
+            clusters = DominantColorsFun(brick)
+            if not isinstance(clusters, list):
+                clusters = [clusters]
+
+            # Convert clusters to normalized HSV histogram
+            hist = clusters_to_hist(clusters)
+
+            # Classify brick based on trained histograms
+            predicted_color = classify_brick_hist(hist, tHist)
+            newBrick["color"] = predicted_color
+            newBrick["size"] = classify_brick_size(brick)
+            newRow.append(newBrick)
+        else:
+            newRow.append(None)
+
+    finalBrickMat.append(newRow)
+print(finalBrickMat)
+cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
+
+
 
 colorMatrix = []
 tHist = trained_histograms()
