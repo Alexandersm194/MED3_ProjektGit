@@ -129,10 +129,8 @@ for y, row in enumerate(brick_matrix):
         rows.append(DominantColorsFun(col))
     colorMatrix.append(rows)
 
-for y in range(len(colorMatrix)):
-    print(colorMatrix[y])
-
-colorMatrixImg, colorMatrix = connectColors(colorMatrix)
+# for y in range(len(colorMatrix)):
+#     print(colorMatrix[y])
 
 
 cv.imshow("corrected", corrected_img)
@@ -157,16 +155,17 @@ while a:
 
 if rotation == 3:
     print("rotating 90")
-    np.rot90(colorMatrix, 3)
+    colorMatrix = np.rot90(colorMatrix, 3)
 if rotation == 2:
     print("rotating 180")
-    np.rot90(colorMatrix, 2)
+    colorMatrix = np.rot90(colorMatrix, 2)
 if rotation == 1:
     print("rotating 270")
-    np.rot90(colorMatrix, 1)
+    colorMatrix = np.rot90(colorMatrix, 1)
 
-print(colorMatrix)
+colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 cv.imshow("color", colorMatrixImg)
+
 def brickColor(color):
     brick = np.zeros((100, 75, 3), np.uint8)  # zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
     brick[:] = color  # assigns color value to each element in ndarray
