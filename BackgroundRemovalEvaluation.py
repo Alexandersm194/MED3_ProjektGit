@@ -2,10 +2,11 @@ import cv2
 import Segmentation
 import os
 
-programDir = "TestImages//Angle//0 degrees"
-groundDir = "TestImages//Angle//0 degrees GT"
+programDir = "TestImages//Direction//45 degrees"
+groundDir = "TestImages//Direction//45 degrees GT"
 programImages = []
 groundImages = []
+figureNames = []
 
 
 if os.path.isdir(programDir):
@@ -17,6 +18,7 @@ if os.path.isdir(programDir):
         else:
             print(f"Image loaded successfully: {full_path}")
             programImages.append(img)
+            figureNames.append(file)
 
 if os.path.isdir(groundDir):
     for file in os.listdir(groundDir):
@@ -42,10 +44,6 @@ def IoU(programImg, groundTruthImg):
     programImg = Segmentation.background_removal(programImg)[0]
 
     groundTruthImg = cv2.threshold(groundTruthImg, 1, 255, cv2.THRESH_BINARY)[1]
-    cv2.imshow("Image", groundTruthImg)
-    cv2.waitKey(0)
-    cv2.imshow("Image", programImg)
-    cv2.waitKey(0)
 
     intersection = 0.000
     falseNegative = 0.000
@@ -55,12 +53,22 @@ def IoU(programImg, groundTruthImg):
                 intersection += 1
             elif programImg[y][x] != groundTruthImg[y][x]:
                 falseNegative += 1
-    return intersection/(intersection + falseNegative)
+    iou = intersection/(intersection + falseNegative)
+    if iou < 0.6:
+        cv2.namedWindow("Program", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("Ground Truth", cv2.WINDOW_NORMAL)
+        cv2.imshow("Program", programImg)
+        cv2.imshow("Ground Truth", groundTruthImg)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    return iou
 
 gatheredIoU = 0
 for i, img in enumerate(programImages):
-    gatheredIoU += IoU(programImages[i], groundImages[i])
+    iou = IoU(programImages[i], groundImages[i])
+    print(f"Figure {figureNames[i]}: {iou}")
+    gatheredIoU += iou
 
 averageIoU = gatheredIoU / len(programImages)
-
-
+print(f"Average: {averageIoU}")

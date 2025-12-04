@@ -5,24 +5,31 @@ import os
 
 
 def DirecetionEval(img):
-    yIn = img.shape[0] / 5.4
-    xIn = img.shape[1] / 8
-
-    # convert to integers for cropping
-    yIn = int(yIn)
-    xIn = int(xIn)
+    yIn = int(img.shape[0] / 5.4)
+    xIn = int(img.shape[1] / 8)
     figureImg = img[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
 
     edge = MD.brickEdge(figureImg)[1]
 
-
-    # Direction
+    # detector returns a normal → convert to orientation
     dominant_angle = MD.dominant_angle_from_lines(edge)
+
     return dominant_angle
 
-programDir = ""
+def norm180(a):
+    return a % 180
+
+def orientation_diff(a, b):
+    d = abs(norm180(a) - norm180(b))
+    return min(d, 180 - d)
+
+def angle_error(det, exp):
+    return orientation_diff(det, exp)
+
+programDir = "TestImages//Lighting//HardLighting"
 expectedAngle = 0
 programImages = []
+figureNames = []
 
 if os.path.isdir(programDir):
     for file in os.listdir(programDir):
@@ -33,13 +40,19 @@ if os.path.isdir(programDir):
         else:
             print(f"Image loaded successfully: {full_path}")
             programImages.append(img)
+            figureNames.append(file)
 
 gatheredError = 0
 
-for image in programImages:
-    angle = DirecetionEval(image)
-    gatheredError += np.abs(angle - expectedAngle)
-    print(f"Expected: {expectedAngle}, Gathered: {angle}")
+for i, image in enumerate(programImages):
+    det = DirecetionEval(image)
+
+    error = angle_error(det, expectedAngle)
+    gatheredError += error
+    if det > 90:
+        error = 90 - error
+
+    print(f"In figure {figureNames[i]}, Expected: {expectedAngle}, Error: {error:.2f}")
 
 averageError = gatheredError / len(programImages)
 print(f"Average Error: {averageError}")
