@@ -71,12 +71,10 @@ def train_color_histograms():
             img = cv2.imread(img_file)
             if img is None:
                 continue
-            imgBin = background_removal(img)[0]
+            '''imgBin = background_removal(img)[0]
             cropped_bin, x, y, w, h = find_bounding_box(imgBin)
             img = img[y:y + h, x:x + w]
-            img = background_removal(img)[1]
-            cv2.imshow("test", img)
-            cv2.waitKey(0)
+            img = background_removal(img)[1]'''
 
             # Use DominantColorsFun to get cluster centers (all 3 clusters)
             clusters = DominantColorsFun(img)  # modify to return list of tuples if not already

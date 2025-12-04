@@ -4,10 +4,10 @@ import Segmentation
 def assign_boxes_by_center(sorted_boxes,
                            nrBricksVertical, nrBricksHorizontal,
                            brickHeight, brickWidth, dotHeight=0,
-                           center_bias_x=0.45):
+                           center_bias_x=1):
 
     # Allocate empty grid
-    grid = [[None for _ in range(nrBricksHorizontal)]
+    grid = [[None for _ in range(nrBricksHorizontal - 1)]
             for _ in range(nrBricksVertical)]
 
     used = set()  # prevent multi-assignment of same box
@@ -24,13 +24,13 @@ def assign_boxes_by_center(sorted_boxes,
             cy = y + h / 2
 
             # Compute grid location
-            grid_y = int((cy - dotHeight) // brickHeight)
-            grid_x = int(cx // brickWidth)
+            grid_x = int((x + w * (1 - center_bias_x)) // brickWidth)
+            grid_y = int((y + h / 2 - dotHeight) // brickHeight)
 
             # Check boundaries
             if not (0 <= grid_y < nrBricksVertical):
                 continue
-            if not (0 <= grid_x < nrBricksHorizontal):
+            if not (0 <= grid_x < nrBricksHorizontal - 1):
                 continue
 
             # Only assign if the cell is empty
@@ -91,17 +91,18 @@ def sort_bricks_grid(brick_boxes, brick_images):
         final_boxes.append([tuple(boxes[i]) for i in row_sorted])
 
     return final_images, final_boxes
-def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight=0):
-    # 1. Edge removal / mask refinement
+def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
+                 dotHeight=0, center_bias_x=1):
+
     edge = cv.Canny(corrected_img, 100, 200)
-    edge = cv.dilate(edge, np.ones((10, 10), np.uint8), iterations=2)
+    edge = cv.dilate(edge, np.ones((5, 5), np.uint8), iterations=2)
+
     bricks_mask = corrected_img_bin - edge
 
-    # Morphology clean-up
     bricks_mask = cv.morphologyEx(bricks_mask, cv.MORPH_OPEN,
                                   np.ones((40, 40), np.uint8), iterations=1)
 
-    # 2. Find contours
+
     cnts, _ = cv.findContours(bricks_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     brick_images = []
@@ -114,29 +115,30 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotH
 
         x, y, w, h = cv.boundingRect(cnt)
 
-        pad = 5
+        pad = 8
         x = max(0, x - pad)
         y = max(0, y - pad)
         w = min(corrected_img.shape[1] - x, w + pad * 2)
         h = min(corrected_img.shape[0] - y, h + pad * 2)
 
-        crop = corrected_img[y:y+h, x:x+w].copy()
+        crop = corrected_img[y:y + h, x:x + w].copy()
 
         brick_images.append(crop)
         brick_boxes.append((x, y, w, h))
 
-        cv.rectangle(corrected_img, (x,y), (x+w, y+h), (0,255,0), 2)
+        cv.rectangle(corrected_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     cv.imshow("Detected bricks", corrected_img)
     cv.waitKey(0)
 
+    # 3. Sort bricks into rows and then by X
     sorted_images, sorted_boxes = sort_bricks_grid(brick_boxes, brick_images)
 
     img_h, img_w = corrected_img.shape[:2]
     nrBricksHorizontal = img_w // brickWidth
     nrBricksVertical = (img_h - dotHeight) // brickHeight
 
-    # --- assign images by center ---
+    # --- assign images by biased center ---
     final_grid = [[None for _ in range(nrBricksHorizontal)]
                   for _ in range(nrBricksVertical)]
 
@@ -146,12 +148,15 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotH
                 continue
 
             x, y, w, h = box
-            cx = x + w / 2
-            cy = y + h / 2
 
-            grid_y = min(int((cy - dotHeight) // brickHeight), nrBricksVertical - 1)
-            grid_x = min(int(cx // brickWidth), nrBricksHorizontal - 1)
+            # Apply horizontal left-bias
+            cx_biased = x + w * (1 - center_bias_x)
+            cy_center = y + h / 2
+
+            grid_x = min(int(cx_biased // brickWidth), nrBricksHorizontal - 1)
+            grid_y = min(int((cy_center - dotHeight) // brickHeight), nrBricksVertical - 1)
 
             final_grid[grid_y][grid_x] = img
 
     return final_grid
+

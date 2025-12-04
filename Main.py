@@ -14,7 +14,7 @@ from BrickClassifier import classify_brick_hist, classify_brick_size
 from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
 from BrickDetector import brick_detect
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -72,7 +72,7 @@ cv.imshow("corrected BINARY", corrected_img_bin)
 cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 #BrickMatrix
-#brickWidth += int(brickHeight*0.05)
+brickWidth += int(brickHeight*0.05)
 bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
 
 '''brickMat = []
