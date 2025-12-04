@@ -184,8 +184,8 @@ PFig4 = [
 
 
 
-truthFig = AFig1
-img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
+truthFig = AFig2
+img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
 imgOrg = img.copy()
 #figureImg = imgOrg[]
 
@@ -254,48 +254,61 @@ for y, row in enumerate(brick_matrix):
         rows.append(DominantColorsFun(col))
     colorMatrix.append(rows)
 
-# for y in range(len(colorMatrix)):
-#     print(colorMatrix[y])
+for y in range(len(colorMatrix)):
+    print(colorMatrix[y])
 
 
 cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
-a = True
-while a:
-    print("how much to rotate clockwise?")
-    rotation = input("type 0, 90, 180, or 270")
-    if rotation == "0":
-        rotation = 0
-        a = False
-    if rotation == "90":
-        rotation = 3
-        a = False
-    if rotation == "180":
-        rotation = 2
-        a = False
-    if rotation == "270":
-        rotation = 1
-        a = False
-
-if rotation == 3:
-    print("rotating 90")
-    colorMatrix = np.rot90(colorMatrix, 3)
-if rotation == 2:
-    print("rotating 180")
-    colorMatrix = np.rot90(colorMatrix, 2)
-if rotation == 1:
-    print("rotating 270")
-    colorMatrix = np.rot90(colorMatrix, 1)
-
-colorMatrixImg, colorMatrix = connectColors(colorMatrix)
-cv.imshow("color", colorMatrixImg)
+#### manually rotate matrix ####
+# a = True
+# while a:
+#     print("how much to rotate clockwise?")
+#     rotation = input("type 0, 90, 180, or 270")
+#     if rotation == "0":
+#         rotation = 0
+#         a = False
+#     if rotation == "90":
+#         rotation = 3
+#         a = False
+#     if rotation == "180":
+#         rotation = 2
+#         a = False
+#     if rotation == "270":
+#         rotation = 1
+#         a = False
+#
+# if rotation == 3:
+#     print("rotating 90")
+#     colorMatrix = np.rot90(colorMatrix, 3)
+# if rotation == 2:
+#     print("rotating 180")
+#     colorMatrix = np.rot90(colorMatrix, 2)
+# if rotation == 1:
+#     print("rotating 270")
+#     colorMatrix = np.rot90(colorMatrix, 1)
+#
+# colorMatrixImg, colorMatrix = connectColors(colorMatrix)
+# cv.imshow("color", colorMatrixImg)
 
 def brickColor(color):
     brick = np.zeros((100, 75, 3), np.uint8)  # zeros creates an ndarray of zeroes. 3rd shape value is amount of numbers in tuple. uint8 goes from 0 to 255 and is often used for images
     brick[:] = color  # assigns color value to each element in ndarray
     return brick
 
+#### make matrix smaller than or equal truth figure ####
+# while len(colorMatrix) > len(truthFig):
+#     print(len(colorMatrix),len(truthFig))
+#     colorMatrix = np.delete(colorMatrix, -1, 0)
+#
+# while len(colorMatrix[0]) > len(truthFig[0]):
+#     print(len(colorMatrix[0]),len(truthFig[0]))
+#     colorMatrix = np.delete(colorMatrix, -1, 1)
+
+
+#### get difference between height and width ####
+print("matrix height/width:", len(colorMatrix), len(colorMatrix[0]), "\n figure height/width:", len(truthFig), len(truthFig[0]))
 if len(colorMatrix) == len(truthFig):
     print("same height")
 else:
@@ -307,40 +320,33 @@ else:
     print("width is ", len(colorMatrix[0]) - len(truthFig[0]), " bricks off")
 
 
-while len(colorMatrix) > len(truthFig):
-    colorMatrix = colorMatrix[:-1]
-
-while len(colorMatrix[0]) > len(truthFig[0]):
-    for i in colorMatrix:
-        colorMatrix = colorMatrix[:,:-1]
-
-correct = 0
-incorrect = 0
-if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0]):
-    for y in range(len(colorMatrix)):
-        for x in range(len(colorMatrix[y])):
-            brick = brickColor(colorMatrix[y][x])
-            cv.imshow(str(x), brick)
-            cv.waitKey(50)
-            cv.destroyWindow(str(x - 1))
-            # print("is this color ", truthFig[y][x], "?")
-            # answer = input("y/n")
-
-            a = True
-            b = ""
-            while a:
-                print("is this color ", truthFig[y][x], "?")
-                b = input("y/n")
-
-                if b == "y" or b == "n":
-                    print(b)
-                    a= False
-                else:
-                    print("Invalid input, please try again.")
-
-            if b == "y":
-                correct += 1
-            if b == "n":
-                incorrect += 1
-print("correct:", correct)
-print("incorrect:", incorrect)
+# correct = 0
+# incorrect = 0
+# if len(colorMatrix) <= len(truthFig) and len(colorMatrix[0]) <= len(truthFig[0]):
+#     for y in range(len(colorMatrix)):
+#         for x in range(len(colorMatrix[y])):
+#             brick = brickColor(colorMatrix[y][x])
+#             cv.imshow(str(x), brick)
+#             cv.waitKey(50)
+#             cv.destroyWindow(str(x - 1))
+#             # print("is this color ", truthFig[y][x], "?")
+#             # answer = input("y/n")
+#
+#             a = True
+#             b = ""
+#             while a:
+#                 print("is this color ", truthFig[y][x], "?")
+#                 b = input("y/n")
+#
+#                 if b == "y" or b == "n":
+#                     print(b)
+#                     a= False
+#                 else:
+#                     print("Invalid input, please try again.")
+#
+#             if b == "y":
+#                 correct += 1
+#             if b == "n":
+#                 incorrect += 1
+# print("correct:", correct)
+# print("incorrect:", incorrect)
