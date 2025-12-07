@@ -7,14 +7,12 @@ import Segmentation
 import PreProcessing
 import json
 from DominantColors import DominantColorsFun
-from ColorProcessor import visualizeMatrix, connectColors
-from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
-from BrickClassifier import classify_brick_hist, classify_brick_size
-from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
+from BrickClassifier import classify_brick_size, classify_brick_mahalanobis
+from ThresholdTrainer import clusters_to_hist, train_color_mahalanobis
 from BrickDetector import brick_detect
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -35,9 +33,6 @@ cv.imshow("Org", figureImg)
 cv.waitKey(0)
 
 #Background Removal
-'''whole_blob = Segmentation.background_removal(img)[0]
-blob = Segmentation.background_removal(figureImg)[0]'''
-
 whole_blob = remove_background(img)
 blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
@@ -59,20 +54,26 @@ cropped_org = rotated_org[y:y + h, x:x + w]
 
 cv.imshow("Rotated", cropped_bin)
 cv.waitKey(0)
-
-#FindUp
-isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin, whole_blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
+#FindUp
+isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
+
+if isOnSide:
+    corrected_img_bin = MD.rotateImage(cropped_bin, 90)
+    corrected_img = MD.rotateImage(corrected_img, 90)
+    isUp = Matrix.find_up(corrected_img_bin, whole_blob)[0]
+
 if isUp is False:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
     corrected_img = MD.rotateImage(corrected_img, 180)
 
+
 cv.imshow("corrected BINARY", corrected_img_bin)
 cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
-#BrickMatrix
-brickWidth += int(brickHeight*0.05)
+
+#brickWidth += int(brickHeight*0.05)
 bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
 
 '''brickMat = []
@@ -92,7 +93,8 @@ brickDic = {
     "size": 0,
     "color": "unknown"
 }
-tHist = trained_histograms()
+#tHist = trained_histograms()
+tHist = train_color_mahalanobis()
 finalBrickMat = []
 for row in bricks:
     newRow = []
@@ -103,11 +105,9 @@ for row in bricks:
             if not isinstance(clusters, list):
                 clusters = [clusters]
 
-            # Convert clusters to normalized HSV histogram
             hist = clusters_to_hist(clusters)
 
-            # Classify brick based on trained histograms
-            predicted_color = classify_brick_hist(hist, tHist)
+            predicted_color = classify_brick_mahalanobis(hist, tHist)
             newBrick["color"] = predicted_color
             newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
             newRow.append(newBrick)
@@ -115,7 +115,7 @@ for row in bricks:
             newRow.append(None)
 
     finalBrickMat.append(newRow)
-#print(finalBrickMat)
+
 for row in finalBrickMat:
     print(row)
 

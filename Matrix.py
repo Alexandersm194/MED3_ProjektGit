@@ -77,70 +77,33 @@ def find_up(crop, ref):
     LegoBrickCleanHeight = math.floor(LegoBrickHeight * 0.85)
     print(LegoBrickCleanHeight)
     print(LegoBrickWidth)
-    up_brick_kernel = cropped[0:LegoBrickDotHeight, 0:LegoBrickWidth]
+    up_brick_kernel = cropped
     down_brick_kernel = cv.rotate(up_brick_kernel, cv.ROTATE_180)
+    matchUp = cv.matchTemplate(crop, up_brick_kernel, cv.TM_CCOEFF_NORMED)
+    matchDown = cv.matchTemplate(crop, down_brick_kernel, cv.TM_CCOEFF_NORMED)
 
-    def get_main_contour(binary_img):
-        # Find all contours
-        contours, _ = cv.findContours(binary_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        if not contours:
-            return None
-        # Return the largest contour
-        return max(contours, key=cv.contourArea)
+    # Threshold (float32 result)
+    _, matchUp = cv.threshold(matchUp, 0.8, 1.0, cv.THRESH_BINARY)
+    _, matchDown = cv.threshold(matchDown, 0.8, 1.0, cv.THRESH_BINARY)
 
-    def get_contour_angle(contour):
-        # Get the minimum-area rectangle around the contour
-        rect = cv.minAreaRect(contour)
-        angle = rect[-1]
-        # Adjust the angle to a range of [-90, 90]
-        if angle < -45:
-            angle += 90
-        return angle
+    # Convert to uint8 so findContours works
+    matchUp = (matchUp * 255).astype(np.uint8)
+    matchDown = (matchDown * 255).astype(np.uint8)
 
-    def is_upright(large_img, kernel_up, kernel_down):
-        # Extract main contours
-        cnt_large = get_main_contour(large_img)
-        cnt_up = get_main_contour(kernel_up)
-        cnt_down = get_main_contour(kernel_down)
+    cv.imshow("kernel_up", matchUp)
+    cv.waitKey(0)
+    cv.imshow("kernel_down", matchDown)
+    cv.waitKey(0)
 
-        if cnt_large is None or cnt_up is None or cnt_down is None:
-            print("One of the contours was not found!")
-            return None
+    upCnt, _ = cv.findContours(matchUp, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    downCnt, _ = cv.findContours(matchDown, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-        # Get angles
-        angle_large = get_contour_angle(cnt_large)
-        angle_up = get_contour_angle(cnt_up)
-        angle_down = get_contour_angle(cnt_down)
+    isUp = len(upCnt) > len(downCnt)
 
-        # Compare angles to decide uprightness
-        diff_up = abs(angle_large - angle_up)
-        diff_down = abs(angle_large - angle_down)
-
-        print(f"Angle large: {angle_large:.2f}, Angle up: {angle_up:.2f}, Angle down: {angle_down:.2f}")
-        print(f"Diff up: {diff_up:.2f}, Diff down: {diff_down:.2f}")
-
-        return diff_up < diff_down
-
-    isUp = is_upright(crop, up_brick_kernel, down_brick_kernel)
-    print(f"IS UP{isUp}")
-    '''top = 0
-    bottom = 0
+    isOnSide = len(upCnt) == len(downCnt)
 
 
-    for y in range(LegoBrickDotHeight):
-        for x in range(crop.shape[1]):
-            if crop[y, x] == 255:
-                top += 1
-
-    for y in range(LegoBrickDotHeight):
-        bot = crop.shape[0] - y - 1
-        for x in range(crop.shape[1]):
-            if crop[bot, x] == 255:
-                bottom += 1
-
-    print(f"Top: {top}, Bottom: {bottom}")
-    isUp = False if top > bottom else True'''
-    return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth
+    return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth, isOnSide
 
 
 def count_bricks_horizontal(img_width, brickWidth, tolerance=0.01):
