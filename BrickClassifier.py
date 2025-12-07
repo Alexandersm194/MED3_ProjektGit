@@ -1,13 +1,36 @@
 import cv2
 import numpy as np
 
+def classify_brick_size(brick_img, brickHeight, brickWidth):
+    brickRatios = []
+
+    for i in range(1, 9):
+        brickRatios.append(brickHeight / (brickWidth * i))
+    height, width = brick_img.shape[:2]
+
+    ratio = height / width
+
+    best_match_dis = 10
+    best_match = -1
+    best_match_ratio = 0
+
+    for index, brick_ratio in enumerate(brickRatios):
+        distance = abs(ratio - brick_ratio)
+        if distance < best_match_dis:
+            best_match_dis = distance
+            best_match = index
+            best_match_ratio = brick_ratio
+    if best_match == -1:
+        return -1
+    else:
+        size = best_match + 1
+        return size
+
+
+
+
 def classify_brick_hist(hist, trained_histograms, threshold=0.0):
-    """
-    hist: normalized HSV histogram of one brick
-    trained_histograms: dict of color_name -> histogram
-    threshold: minimum correlation to accept classification
-    returns: predicted color name or 'unknown'
-    """
+
     best_score = -1
     predicted_color = "unknown"
 
@@ -23,3 +46,25 @@ def classify_brick_hist(hist, trained_histograms, threshold=0.0):
     if best_score < threshold:
         return "unknown"
     return predicted_color
+
+
+def classify_brick_mahalanobis(hist, trained_models, threshold=None):
+    hist = hist.astype(np.float32)
+    best_color = "unknown"
+    best_distance = float('inf')
+
+    for color_name, model in trained_models.items():
+        mean_vec = model["mean"]
+        inv_cov = model["inv_cov"]
+
+        diff = hist - mean_vec
+        d = float(np.sqrt(diff.T @ inv_cov @ diff))
+
+        if d < best_distance:
+            best_distance = d
+            best_color = color_name
+
+    if threshold is not None and best_distance > threshold:
+        return "unknown"
+
+    return best_color

@@ -7,13 +7,12 @@ import Segmentation
 import PreProcessing
 import json
 from DominantColors import DominantColorsFun
-from ColorProcessor import visualizeMatrix, connectColors
-from PointImgCrop import rectify
 from BackgroundSubtraction import remove_background
-from BrickClassifier import classify_brick_hist
-from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
+from BrickClassifier import classify_brick_size, classify_brick_mahalanobis
+from ThresholdTrainer import clusters_to_hist, train_color_mahalanobis
+from BrickDetector import brick_detect
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -34,9 +33,6 @@ cv.imshow("Org", figureImg)
 cv.waitKey(0)
 
 #Background Removal
-'''whole_blob = Segmentation.background_removal(img)[0]
-blob = Segmentation.background_removal(figureImg)[0]'''
-
 whole_blob = remove_background(img)
 blob = remove_background(figureImg)
 edge = MD.brickEdge(figureImg)[1]
@@ -58,23 +54,85 @@ cropped_org = rotated_org[y:y + h, x:x + w]
 
 cv.imshow("Rotated", cropped_bin)
 cv.waitKey(0)
-
-#FindUp
-isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin, whole_blob)
 corrected_img_bin = cropped_bin
 corrected_img = cropped_org
+#FindUp
+isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
+print(isOnSide)
+if isOnSide:
+    rotated = MD.rotateImage(rotated, 90)
+    rotated_org = MD.rotateImage(rotated_org, 90)
+    cv.namedWindow("rot", cv.WINDOW_NORMAL)
+    cv.imshow("rot", rotated)
+    cv.waitKey(0)
+
+    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
+    corrected_img = rotated_org[y:y + h, x:x + w]
+
+    isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
+
 if isUp is False:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
     corrected_img = MD.rotateImage(corrected_img, 180)
+
 
 cv.imshow("corrected BINARY", corrected_img_bin)
 cv.imshow("corrected", corrected_img)
 cv.waitKey(0)
 
-#BrickMatrix
-brickWidth += int(brickHeight*0.05) #changing brickWidth fixes cropping on this model but will not work with other models
+#brickWidth += int(brickHeight*0.05)
+bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
+
+'''brickMat = []
+for row in bricks:
+    newRow = []
+    for brick in row:
+        if(brick is not None):
+            newRow.append(1)
+            cv.imshow("brick", brick)
+            cv.waitKey(0)
+        else:
+            newRow.append(0)
+
+    brickMat.append(newRow)'''
+
+brickDic = {
+    "size": 0,
+    "color": "unknown"
+}
+#tHist = trained_histograms()
+tHist = train_color_mahalanobis()
+finalBrickMat = []
+for row in bricks:
+    newRow = []
+    for brick in row:
+        if(brick is not None):
+            newBrick = brickDic.copy()
+            clusters = DominantColorsFun(brick)
+            if not isinstance(clusters, list):
+                clusters = [clusters]
+
+            hist = clusters_to_hist(clusters)
+
+            predicted_color = classify_brick_mahalanobis(hist, tHist)
+            newBrick["color"] = predicted_color
+            newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
+            newRow.append(newBrick)
+        else:
+            newRow.append(None)
+
+    finalBrickMat.append(newRow)
+
+for row in finalBrickMat:
+    print(row)
+
+cv.waitKey(0)
+
+'''cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
+
+
 
 colorMatrix = []
 tHist = trained_histograms()
@@ -101,7 +159,7 @@ cv2.waitKey(0)
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
 cv.imshow("colorMatrix", colorMatrixImg)
-cv.waitKey(0)
+cv.waitKey(0)'''
 
 # print(colorMatrix)
 # print(len(brick_matrix))
@@ -130,7 +188,7 @@ SomethingMatrix = []
 print(SomethingMatrix)'''
 
 
-ColorMatrix = [
+'''ColorMatrix = [
     ["empty", "empty" , "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty"],
     ["empty", "empty" , "empty", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
     ["empty", "empty" , "red", "red", "green", "green", "green", "green", "empty", "empty"],
@@ -174,7 +232,7 @@ for y, row in enumerate(colorMatrix):
             newBrick["isEmpty"] = False
 
         new_row.append(newBrick)
-    brick_matrix.append(new_row)
+    brick_matrix.append(new_row)'''
 
 
 '''final_brick_matrix = []
@@ -221,7 +279,7 @@ for y, row in enumerate(brick_matrix):
 
 print(final_brick_matrix)'''
 
-brick_final = {
+'''brick_final = {
     "length": 0,
     "color": "",
     "isEmpty": False
@@ -280,9 +338,9 @@ for y, row in enumerate(brick_matrix):
 
     final_brick_matrix.append(final_row)
 
-print(final_brick_matrix)
+print(final_brick_matrix)'''
 
 
-json_str = json.dumps(final_brick_matrix)
+json_str = json.dumps(finalBrickMat)
 with open("sample.json", "w") as f:
     f.write(json_str)

@@ -49,9 +49,6 @@ def clusters_to_hist(clusters):
     hist /= hist.sum()
     return hist
 
-# ---------------------------------------------------------
-# TRAINING: compute histogram per color using all clusters
-# ---------------------------------------------------------
 def train_color_histograms():
     color_histograms = {}
 
@@ -71,15 +68,9 @@ def train_color_histograms():
             img = cv2.imread(img_file)
             if img is None:
                 continue
-            imgBin = background_removal(img)[0]
-            cropped_bin, x, y, w, h = find_bounding_box(imgBin)
-            img = img[y:y + h, x:x + w]
-            img = background_removal(img)[1]
-            cv2.imshow("test", img)
-            cv2.waitKey(0)
 
-            # Use DominantColorsFun to get cluster centers (all 3 clusters)
-            clusters = DominantColorsFun(img)  # modify to return list of tuples if not already
+
+            clusters = DominantColorsFun(img)
             if not isinstance(clusters, list):
                 clusters = [clusters]
 
@@ -93,3 +84,56 @@ def train_color_histograms():
 
     return color_histograms
 
+def train_color_mahalanobis():
+    color_models = {}
+
+    for color_name in os.listdir(dataset_dir):
+        color_path = os.path.join(dataset_dir, color_name)
+        if not os.path.isdir(color_path):
+            continue
+
+        print(f"Processing color: {color_name}")
+
+        hist_list = []
+
+        for img_file in glob(os.path.join(color_path, "*.jpg")) + \
+                         glob(os.path.join(color_path, "*.png")) + \
+                         glob(os.path.join(color_path, "*.jpeg")):
+
+            img = cv2.imread(img_file)
+            if img is None:
+                continue
+
+            clusters = DominantColorsFun(img)
+            if not isinstance(clusters, list):
+                clusters = [clusters]
+
+            hist = clusters_to_hist(clusters)
+            hist_list.append(hist)
+
+        if len(hist_list) < 2:
+            print(f"Not enough samples for {color_name}, skipping.")
+            continue
+
+        # Convert list to matrix (N samples × D features)
+        X = np.vstack(hist_list).astype(np.float32)
+
+        # Compute mean
+        mean_vec = np.mean(X, axis=0)
+
+        # Compute covariance (regularized to avoid singular matrices)
+        cov = np.cov(X, rowvar=False)
+
+        # Regularization for numerical stability
+        cov += np.eye(cov.shape[0]) * 1e-6
+
+        inv_cov = np.linalg.inv(cov)
+
+        color_models[color_name] = {
+            "mean": mean_vec,
+            "inv_cov": inv_cov
+        }
+
+        print(f"{color_name}: Mahalanobis model computed.")
+
+    return color_models
