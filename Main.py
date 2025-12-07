@@ -58,11 +58,18 @@ corrected_img_bin = cropped_bin
 corrected_img = cropped_org
 #FindUp
 isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
-
+print(isOnSide)
 if isOnSide:
-    corrected_img_bin = MD.rotateImage(cropped_bin, 90)
-    corrected_img = MD.rotateImage(corrected_img, 90)
-    isUp = Matrix.find_up(corrected_img_bin, whole_blob)[0]
+    rotated = MD.rotateImage(rotated, 90)
+    rotated_org = MD.rotateImage(rotated_org, 90)
+    cv.namedWindow("rot", cv.WINDOW_NORMAL)
+    cv.imshow("rot", rotated)
+    cv.waitKey(0)
+
+    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
+    corrected_img = rotated_org[y:y + h, x:x + w]
+
+    isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
 
 if isUp is False:
     corrected_img_bin = MD.rotateImage(cropped_bin, 180)
