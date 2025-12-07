@@ -2,9 +2,11 @@ import cv2 as cv
 import numpy as np
 import ModelDirection as MD
 import os
+from PointImgCrop import rectify
 
 
 def DirecetionEval(img):
+    img = rectify(img)[0]
     yIn = int(img.shape[0] / 5.4)
     xIn = int(img.shape[1] / 8)
     figureImg = img[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
@@ -26,7 +28,7 @@ def orientation_diff(a, b):
 def angle_error(det, exp):
     return orientation_diff(det, exp)
 
-programDir = "TestImages//Lighting//HardLighting"
+programDir = "TestImagesV1//Lighting//HardLighting"
 expectedAngle = 0
 programImages = []
 figureNames = []
@@ -48,9 +50,9 @@ for i, image in enumerate(programImages):
     det = DirecetionEval(image)
 
     error = angle_error(det, expectedAngle)
-    gatheredError += error
     if det > 90:
         error = 90 - error
+    gatheredError += error
 
     print(f"In figure {figureNames[i]}, Expected: {expectedAngle}, Error: {error:.2f}")
 

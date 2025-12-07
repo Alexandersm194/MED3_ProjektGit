@@ -18,7 +18,7 @@ def LegoFigureProgram(img):
     imgOrg = img.copy()
     # figureImg = imgOrg[]
 
-    yIn = img.shape[0] / 5.4
+    '''yIn = img.shape[0] / 5.4
     xIn = img.shape[1] / 8
 
     # convert to integers for cropping
@@ -26,7 +26,8 @@ def LegoFigureProgram(img):
     xIn = int(xIn)
 
     # figureImg = imgOrg[:yIn, :xIn]
-    figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+    figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]'''
+    figureImg = rectify(img)[0]
     '''cv.namedWindow("Image", cv.WINDOW_NORMAL)
     cv.namedWindow("Org", cv.WINDOW_NORMAL)
     cv.imshow("Image", img)
@@ -46,42 +47,62 @@ def LegoFigureProgram(img):
     dominant_angle = MD.dominant_angle_from_lines(edge)
 
     # Rotate
-    rotated = MD.rotateImage(blob, dominant_angle)
+    rotated_bin = MD.rotateImage(blob, dominant_angle)
     rotated_org = MD.rotateImage(figureImg, dominant_angle)
 
-    # FindBoundingBox
-    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
+    # ----------------------------------------------------------
+    # 2) Initial bounding box (required for find_up)
+    # ----------------------------------------------------------
+    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
     cropped_org = rotated_org[y:y + h, x:x + w]
 
-    '''cv.imshow("Rotated", cropped_bin)
-    cv.waitKey(0)'''
-    corrected_img_bin = cropped_bin
-    corrected_img = cropped_org
-    # FindUp
+    cv.imshow("Rotated", cropped_bin)
+    cv.waitKey(0)
+
+    # ----------------------------------------------------------
+    # 3) Determine orientation from the first bounding box
+    # ----------------------------------------------------------
     isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
-    print(isOnSide)
+    print("isOnSide:", isOnSide)
+
+    # ----------------------------------------------------------
+    # 4) If on side (90°) → rotate the FULL images and re-crop
+    # ----------------------------------------------------------
     if isOnSide:
-        rotated = MD.rotateImage(rotated, 90)
+        # Rotate the full original-rotated images, NOT the cropped ones
+        rotated_bin = MD.rotateImage(rotated_bin, 90)
         rotated_org = MD.rotateImage(rotated_org, 90)
-        '''cv.namedWindow("rot", cv.WINDOW_NORMAL)
-        cv.imshow("rot", rotated)
-        cv.waitKey(0)'''
 
-        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
-        corrected_img = rotated_org[y:y + h, x:x + w]
+        # New bounding box after 90° rotation
+        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
+        cropped_org = rotated_org[y:y + h, x:x + w]
 
+        # Orientation check again from fresh crop
         isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
 
-    if isUp is False:
-        corrected_img_bin = MD.rotateImage(cropped_bin, 180)
-        corrected_img = MD.rotateImage(corrected_img, 180)
+    # ----------------------------------------------------------
+    # 5) If upside down (180°) → rotate FULL images again and re-crop
+    # ----------------------------------------------------------
+    if not isUp:
+        rotated_bin = MD.rotateImage(rotated_bin, 180)
+        rotated_org = MD.rotateImage(rotated_org, 180)
 
-    '''cv.imshow("corrected BINARY", corrected_img_bin)
-    cv.imshow("corrected", corrected_img)
-    cv.waitKey(0)'''
+        # Fresh bounding box after 180° rotation
+        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
+        cropped_org = rotated_org[y:y + h, x:x + w]
 
-    brickWidth += int(brickHeight*0.05)
-    bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
+    # ----------------------------------------------------------
+    # 6) Display corrected result
+    # ----------------------------------------------------------
+    cv.imshow("corrected BINARY", cropped_bin)
+    cv.imshow("corrected", cropped_org)
+    cv.waitKey(0)
+
+    # ----------------------------------------------------------
+    # 7) Brick detection
+    # ----------------------------------------------------------
+    brickWidth += int(brickHeight * 0.05)
+    bricks = brick_detect(cropped_org, cropped_bin, brickWidth, brickHeight, dotHeight)
 
     brickDic = {
         "size": 0,
@@ -114,9 +135,9 @@ def LegoFigureProgram(img):
                 f.write(json_str)'''
 
     return finalBrickMat
-'''
-figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig2.jpg"))
-for row in figure:
+
+'''figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig1.jpg"))'''
+'''for row in figure:
     print(row)'''
 
 '''cv.waitKey(0)
