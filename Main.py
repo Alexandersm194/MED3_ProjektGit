@@ -14,7 +14,7 @@ from BrickClassifier import classify_brick_hist, classify_brick_size
 from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
 from BrickDetector import brick_detect
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig1.jpg")
+img = cv.imread("TestImages/Angle/0 degrees/AFig3.jpg")
 #img = rectify(img)
 imgOrg = img.copy()
 #figureImg = imgOrg[]
@@ -109,14 +109,19 @@ for row in bricks:
             # Classify brick based on trained histograms
             predicted_color = classify_brick_hist(hist, tHist)
             newBrick["color"] = predicted_color
-            newBrick["size"] = classify_brick_size(brick)
+            newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
             newRow.append(newBrick)
         else:
             newRow.append(None)
 
     finalBrickMat.append(newRow)
-print(finalBrickMat)
+#print(finalBrickMat)
+for row in finalBrickMat:
+    print(row)
+
 cv.waitKey(0)
+
+'''cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
 blob_brick_matrix = Matrix.matrix_slice(corrected_img_bin, brickHeight, brickWidth, dotHeight)
 
@@ -147,7 +152,7 @@ cv2.waitKey(0)
 colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 
 cv.imshow("colorMatrix", colorMatrixImg)
-cv.waitKey(0)
+cv.waitKey(0)'''
 
 # print(colorMatrix)
 # print(len(brick_matrix))
@@ -176,7 +181,7 @@ SomethingMatrix = []
 print(SomethingMatrix)'''
 
 
-ColorMatrix = [
+'''ColorMatrix = [
     ["empty", "empty" , "empty", "empty", "blue", "blue", "empty", "empty", "empty", "empty"],
     ["empty", "empty" , "empty", "blue", "blue", "blue", "blue", "empty", "empty", "empty"],
     ["empty", "empty" , "red", "red", "green", "green", "green", "green", "empty", "empty"],
@@ -220,7 +225,7 @@ for y, row in enumerate(colorMatrix):
             newBrick["isEmpty"] = False
 
         new_row.append(newBrick)
-    brick_matrix.append(new_row)
+    brick_matrix.append(new_row)'''
 
 
 '''final_brick_matrix = []
@@ -267,7 +272,7 @@ for y, row in enumerate(brick_matrix):
 
 print(final_brick_matrix)'''
 
-brick_final = {
+'''brick_final = {
     "length": 0,
     "color": "",
     "isEmpty": False
@@ -326,9 +331,9 @@ for y, row in enumerate(brick_matrix):
 
     final_brick_matrix.append(final_row)
 
-print(final_brick_matrix)
+print(final_brick_matrix)'''
 
 
-json_str = json.dumps(final_brick_matrix)
+json_str = json.dumps(finalBrickMat)
 with open("sample.json", "w") as f:
     f.write(json_str)

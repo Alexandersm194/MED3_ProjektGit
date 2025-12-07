@@ -1,61 +1,6 @@
 import cv2 as cv
 import numpy as np
 import Segmentation
-def assign_boxes_by_center(sorted_boxes,
-                           nrBricksVertical, nrBricksHorizontal,
-                           brickHeight, brickWidth, dotHeight=0,
-                           center_bias_x=1):
-
-    # Allocate empty grid
-    grid = [[None for _ in range(nrBricksHorizontal - 1)]
-            for _ in range(nrBricksVertical)]
-
-    used = set()  # prevent multi-assignment of same box
-
-    for row in sorted_boxes:
-        for box in row:
-            if box in used:
-                continue  # skip duplicates
-
-            x, y, w, h = box
-
-            # Compute biased center (shift left)
-            cx = x + w * (0.5 - center_bias_x)
-            cy = y + h / 2
-
-            # Compute grid location
-            grid_x = int((x + w * (1 - center_bias_x)) // brickWidth)
-            grid_y = int((y + h / 2 - dotHeight) // brickHeight)
-
-            # Check boundaries
-            if not (0 <= grid_y < nrBricksVertical):
-                continue
-            if not (0 <= grid_x < nrBricksHorizontal - 1):
-                continue
-
-            # Only assign if the cell is empty
-            if grid[grid_y][grid_x] is None:
-                grid[grid_y][grid_x] = box
-                used.add(box)
-            else:
-                # Collision: choose box whose center is closer to cell center
-                prev_box = grid[grid_y][grid_x]
-                cell_center_x = grid_x * brickWidth + brickWidth / 2
-                cell_center_y = grid_y * brickHeight + dotHeight + brickHeight / 2
-
-                cx_prev = prev_box[0] + prev_box[2] / 2
-                cy_prev = prev_box[1] + prev_box[3] / 2
-
-                dist_new = (cx - cell_center_x)**2 + (cy - cell_center_y)**2
-                dist_prev = (cx_prev - cell_center_x)**2 + (cy_prev - cell_center_y)**2
-
-                if dist_new < dist_prev:
-                    grid[grid_y][grid_x] = box
-                    used.add(box)
-                else:
-                    used.add(prev_box)
-
-    return grid
 def sort_bricks_grid(brick_boxes, brick_images):
     boxes = np.array(brick_boxes)
 
@@ -92,9 +37,18 @@ def sort_bricks_grid(brick_boxes, brick_images):
 
     return final_images, final_boxes
 def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
-                 dotHeight=0, center_bias_x=1):
+                 dotHeight=0, center_bias_x=0.9):
 
-    edge = cv.Canny(corrected_img, 100, 200)
+    hsv = cv.cvtColor(corrected_img, cv.COLOR_BGR2LAB)
+    h, s, v = cv.split(hsv)
+
+    # Increase contrast by scaling V
+    alpha = 2 # contrast factor (>1 = more contrast)
+    v = np.clip(v * alpha, 0, 255).astype(np.uint8)
+
+    # Merge back
+    hsv_contrast = cv.merge([h, s, v])
+    edge = cv.Canny(hsv_contrast, 100, 200)
     edge = cv.dilate(edge, np.ones((5, 5), np.uint8), iterations=2)
 
     bricks_mask = corrected_img_bin - edge
@@ -127,7 +81,7 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
         brick_boxes.append((x, y, w, h))
 
         cv.rectangle(corrected_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+    cv.namedWindow("Detected bricks", cv.WINDOW_NORMAL)
     cv.imshow("Detected bricks", corrected_img)
     cv.waitKey(0)
 
