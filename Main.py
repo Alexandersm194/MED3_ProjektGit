@@ -11,122 +11,113 @@ from BackgroundSubtraction import remove_background
 from BrickClassifier import classify_brick_size, classify_brick_mahalanobis
 from ThresholdTrainer import clusters_to_hist, train_color_mahalanobis
 from BrickDetector import brick_detect
+from PointImgCrop import rectify
 
-img = cv.imread("TestImages/Angle/0 degrees/AFig2.jpg")
-#img = rectify(img)
-imgOrg = img.copy()
-#figureImg = imgOrg[]
+def LegoFigureProgram(img):
+    img = rectify(img)[0]
+    imgOrg = img.copy()
+    # figureImg = imgOrg[]
 
-yIn = img.shape[0] / 5.4
-xIn = img.shape[1] / 8
+    yIn = img.shape[0] / 5.4
+    xIn = img.shape[1] / 8
 
-# convert to integers for cropping
-yIn = int(yIn)
-xIn = int(xIn)
+    # convert to integers for cropping
+    yIn = int(yIn)
+    xIn = int(xIn)
 
-#figureImg = imgOrg[:yIn, :xIn]
-figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
-cv.namedWindow("Image", cv.WINDOW_NORMAL)
-cv.namedWindow("Org", cv.WINDOW_NORMAL)
-cv.imshow("Image", img)
-cv.imshow("Org", figureImg)
-cv.waitKey(0)
+    # figureImg = imgOrg[:yIn, :xIn]
+    figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+    '''cv.namedWindow("Image", cv.WINDOW_NORMAL)
+    cv.namedWindow("Org", cv.WINDOW_NORMAL)
+    cv.imshow("Image", img)
+    cv.imshow("Org", figureImg)
+    cv.waitKey(0)'''
 
-#Background Removal
-whole_blob = remove_background(img)
-blob = remove_background(figureImg)
-edge = MD.brickEdge(figureImg)[1]
+    # Background Removal
+    whole_blob = remove_background(img)
+    blob = remove_background(figureImg)
+    edge = MD.brickEdge(figureImg)[1]
 
-cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
-cv.imshow("wholeBlob", whole_blob)
-cv.waitKey(0)
+    '''cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
+    cv.imshow("wholeBlob", whole_blob)
+    cv.waitKey(0)'''
 
-#Direction
-dominant_angle = MD.dominant_angle_from_lines(edge)
+    # Direction
+    dominant_angle = MD.dominant_angle_from_lines(edge)
 
-#Rotate
-rotated = MD.rotateImage(blob, dominant_angle)
-rotated_org = MD.rotateImage(figureImg, dominant_angle)
+    # Rotate
+    rotated = MD.rotateImage(blob, dominant_angle)
+    rotated_org = MD.rotateImage(figureImg, dominant_angle)
 
-#FindBoundingBox
-cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
-cropped_org = rotated_org[y:y + h, x:x + w]
-
-cv.imshow("Rotated", cropped_bin)
-cv.waitKey(0)
-corrected_img_bin = cropped_bin
-corrected_img = cropped_org
-#FindUp
-isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
-print(isOnSide)
-if isOnSide:
-    rotated = MD.rotateImage(rotated, 90)
-    rotated_org = MD.rotateImage(rotated_org, 90)
-    cv.namedWindow("rot", cv.WINDOW_NORMAL)
-    cv.imshow("rot", rotated)
-    cv.waitKey(0)
-
+    # FindBoundingBox
     cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
-    corrected_img = rotated_org[y:y + h, x:x + w]
+    cropped_org = rotated_org[y:y + h, x:x + w]
 
-    isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
+    '''cv.imshow("Rotated", cropped_bin)
+    cv.waitKey(0)'''
+    corrected_img_bin = cropped_bin
+    corrected_img = cropped_org
+    # FindUp
+    isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
+    print(isOnSide)
+    if isOnSide:
+        rotated = MD.rotateImage(rotated, 90)
+        rotated_org = MD.rotateImage(rotated_org, 90)
+        '''cv.namedWindow("rot", cv.WINDOW_NORMAL)
+        cv.imshow("rot", rotated)
+        cv.waitKey(0)'''
 
-if isUp is False:
-    corrected_img_bin = MD.rotateImage(cropped_bin, 180)
-    corrected_img = MD.rotateImage(corrected_img, 180)
+        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
+        corrected_img = rotated_org[y:y + h, x:x + w]
 
+        isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
 
-cv.imshow("corrected BINARY", corrected_img_bin)
-cv.imshow("corrected", corrected_img)
-cv.waitKey(0)
+    if isUp is False:
+        corrected_img_bin = MD.rotateImage(cropped_bin, 180)
+        corrected_img = MD.rotateImage(corrected_img, 180)
 
-#brickWidth += int(brickHeight*0.05)
-bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
+    '''cv.imshow("corrected BINARY", corrected_img_bin)
+    cv.imshow("corrected", corrected_img)
+    cv.waitKey(0)'''
 
-'''brickMat = []
-for row in bricks:
-    newRow = []
-    for brick in row:
-        if(brick is not None):
-            newRow.append(1)
-            cv.imshow("brick", brick)
-            cv.waitKey(0)
-        else:
-            newRow.append(0)
+    brickWidth += int(brickHeight*0.05)
+    bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
 
-    brickMat.append(newRow)'''
+    brickDic = {
+        "size": 0,
+        "color": "unknown"
+    }
+    # tHist = trained_histograms()
+    tHist = train_color_mahalanobis()
+    finalBrickMat = []
+    for row in bricks:
+        newRow = []
+        for brick in row:
+            if (brick is not None):
+                newBrick = brickDic.copy()
+                clusters = DominantColorsFun(brick)
+                if not isinstance(clusters, list):
+                    clusters = [clusters]
 
-brickDic = {
-    "size": 0,
-    "color": "unknown"
-}
-#tHist = trained_histograms()
-tHist = train_color_mahalanobis()
-finalBrickMat = []
-for row in bricks:
-    newRow = []
-    for brick in row:
-        if(brick is not None):
-            newBrick = brickDic.copy()
-            clusters = DominantColorsFun(brick)
-            if not isinstance(clusters, list):
-                clusters = [clusters]
+                hist = clusters_to_hist(clusters)
 
-            hist = clusters_to_hist(clusters)
+                predicted_color = classify_brick_mahalanobis(hist, tHist)
+                newBrick["color"] = predicted_color
+                newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
+                newRow.append(newBrick)
+            else:
+                newRow.append(None)
 
-            predicted_color = classify_brick_mahalanobis(hist, tHist)
-            newBrick["color"] = predicted_color
-            newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
-            newRow.append(newBrick)
-        else:
-            newRow.append(None)
+        finalBrickMat.append(newRow)
+    '''json_str = json.dumps(finalBrickMat)
+            with open("sample.json", "w") as f:
+                f.write(json_str)'''
 
-    finalBrickMat.append(newRow)
-
-for row in finalBrickMat:
-    print(row)
-
-cv.waitKey(0)
+    return finalBrickMat
+'''
+figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig2.jpg"))
+for row in figure:
+    print(row)'''
 
 '''cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
@@ -161,18 +152,7 @@ colorMatrixImg, colorMatrix = connectColors(colorMatrix)
 cv.imshow("colorMatrix", colorMatrixImg)
 cv.waitKey(0)'''
 
-# print(colorMatrix)
-# print(len(brick_matrix))
 
-#Feature Extraction And Classification
-# for y, row in enumerate(brick_matrix):
-#     for x, col in enumerate(row):
-#         print(col.shape)
-#         cv.imshow(f"{y},{x}", col)
-#         cv.waitKey(0)
-#         # cv.destroyAllWindows()
-
-SomethingMatrix = []
 # Brick
 '''for y, row in enumerate(blob_brick_matrix):
     newRow = []
@@ -340,7 +320,3 @@ for y, row in enumerate(brick_matrix):
 
 print(final_brick_matrix)'''
 
-
-json_str = json.dumps(finalBrickMat)
-with open("sample.json", "w") as f:
-    f.write(json_str)

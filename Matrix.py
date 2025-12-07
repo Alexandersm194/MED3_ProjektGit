@@ -90,10 +90,6 @@ def find_up(crop, ref):
     matchUp = (matchUp * 255).astype(np.uint8)
     matchDown = (matchDown * 255).astype(np.uint8)
 
-    cv.imshow("kernel_up", matchUp)
-    cv.waitKey(0)
-    cv.imshow("kernel_down", matchDown)
-    cv.waitKey(0)
 
     upCnt, _ = cv.findContours(matchUp, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     downCnt, _ = cv.findContours(matchDown, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
