@@ -63,3 +63,53 @@ ColorMatrix = [
     ["empty", "empty", "empty", "empty", "yellow", "yellow", "yellow", "yellow", "empty", "empty", "empty", "empty"],
     ["black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black", "black"],
     ["empty", "empty", "red", "red", "red", "red", "light orange", "light orange", "light orange", "light orange", "empty", "empty"]]
+
+
+'''NEW FIGURE MATRICES'''
+# First figure 12x6
+MFig1SizeMatrix = [
+    [None,None,None,None,None,1,1,None,None,None,None,None],
+    [None,None,None,None,2,None,2,None,None,None,None,None],
+    [None,None,4,None,None,None,4,None,None,None,None,None],
+    [4,None,None,None,4,None,None,None,4,None,None,None],
+    [None,None,None,6,None,None,None,None,None,None,None,None],
+    [None,4,None,None,None,None,None,4,None,None,None,None]]
+
+# Second figure 10x7
+MFig2SizeMatrix = [
+    [None,None,None,None,2,None,None,None,None,None],
+    [None,None,2,None,2,None,2,None,None,None],
+    [None,None,None,4,None,None,None,None,None,None],
+    [None,8,None,None,None,None,None,None,None,None],
+    [None,None,None,4,None,None,None,None,None,None],
+    [4,None,None,None,None,None,4,None,None,None],
+    [1,None,6,None,None,None,None,None,None,None,1]]
+
+# Third figure 12x6
+MFi3SizeMatrix = [
+    [None,None,None,None,None,1,1,None,None,None,None,None],
+    [None,None,None,None,4,None,None,None,None,None,None,None],
+    [None,None,None,6,None,None,None,None,None,None,None,None],
+    [None,None,4,None,None,None,4,None,None,None,None,None],
+    [None,8,None,None,None,None,None,None,None,2,None,None],
+    [12,None,None,None,None,None,None,None,None,None,None,None]]
+
+# Fourth figure 10x7
+MFig4SizeMatrix = [
+    [None,None,None,4,None,None,None,None,None,None],
+    [None,None,2,None,None,None,2,None,None,None],
+    [None,2,None,None,None,None,None,2,None,None],
+    [None,None,2,None,None,None,2,None,None,None],
+    [None,None,None,4,None,None,None,None,None,None],
+    [None,8,None,None,None,None,None,None,None,None],
+    [3,None,None,None,None,None,None,3,None,None]]
+
+# Fifth figure 8x7
+MFig5SizeMatrix = [
+    [None,None,4,None,None,None,None,None],
+    [8,None,None,None,None,None,None,None],
+    [None,2,None,1,1,2,None,None],
+    [None,None,4,None,None,None,None,None],
+    [None,6,None,None,None,None,None,None],
+    [None,None,4,None,None,None,None,None],
+    [8,None,None,None,None,None,None,None]]
