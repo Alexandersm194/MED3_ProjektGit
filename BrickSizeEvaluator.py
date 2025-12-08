@@ -7,7 +7,7 @@ import numpy as np
 GroundTruths = getGroundTruth()
 
 
-imageDir = "TestImagesV1//Lighting//Dark"
+imageDir = "TestImagesV1//Lighting//Optimal"
 images = []
 figureNames = []
 
@@ -27,6 +27,17 @@ if os.path.isdir(imageDir):
 TP = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 FP = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 FN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 VerticalError = []
 HorizontalError = []
@@ -53,7 +64,7 @@ for i, image in enumerate(images):
 
             # Safe to access now
             brick = ProgramResult[y][x]
-
+            matrix[brick][col] += 1
             # ---- 2. Normal comparison logic ----
             if col is None and brick is None:
                 TP[0] += 1
@@ -107,3 +118,6 @@ print(f"Averages | Precision: {np.mean(precisions)}, Recall: {np.mean(recalls)},
 
 print(VerticalError)
 print(HorizontalError)
+
+for row in matrix:
+    print(row)

@@ -13,8 +13,8 @@ import os
 import Main
 
 
-imageDir = "TestImagesV1//Lighting//Dark"
-newImageDir = "TestImagesCropped//Lighting//Dark"
+imageDir = "TestImagesV1//Lighting//HardLighting"
+newImageDir = "TestImagesCropped//Lighting//HardLighting"
 testImages = []
 testImgFile = []
 
