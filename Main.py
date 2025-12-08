@@ -56,8 +56,8 @@ def LegoFigureProgram(img):
     cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
     cropped_org = rotated_org[y:y + h, x:x + w]
 
-    cv.imshow("Rotated", cropped_bin)
-    cv.waitKey(0)
+    '''cv.imshow("Rotated", cropped_bin)
+    cv.waitKey(0)'''
 
     # ----------------------------------------------------------
     # 3) Determine orientation from the first bounding box
@@ -94,9 +94,9 @@ def LegoFigureProgram(img):
     # ----------------------------------------------------------
     # 6) Display corrected result
     # ----------------------------------------------------------
-    cv.imshow("corrected BINARY", cropped_bin)
+    '''cv.imshow("corrected BINARY", cropped_bin)
     cv.imshow("corrected", cropped_org)
-    cv.waitKey(0)
+    cv.waitKey(0)'''
 
     # ----------------------------------------------------------
     # 7) Brick detection
@@ -136,9 +136,10 @@ def LegoFigureProgram(img):
 
     return finalBrickMat
 
-'''figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig1.jpg"))'''
-'''for row in figure:
-    print(row)'''
+figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig1.jpg"))
+for row in figure:
+    print(row)
+cv.waitKey(0)
 
 '''cv.waitKey(0)
 brick_matrix = Matrix.matrix_slice(corrected_img, brickHeight, brickWidth, dotHeight)
