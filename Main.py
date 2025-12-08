@@ -126,6 +126,9 @@ def LegoFigureProgram(img):
                 newBrick["color"] = predicted_color
                 newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
                 newRow.append(newBrick)
+                print(predicted_color)
+                cv2.imshow("brick", brick)
+                cv2.waitKey(0)
             else:
                 newRow.append(None)
 
