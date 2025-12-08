@@ -14,7 +14,7 @@ from BrickDetector import brick_detect
 from PointImgCrop import rectify
 
 def LegoFigureProgram(img):
-    img = rectify(img)[0]
+    #img = rectify(img)[0]
     imgOrg = img.copy()
     # figureImg = imgOrg[]
 
@@ -136,7 +136,7 @@ def LegoFigureProgram(img):
 
     return finalBrickMat
 
-figure = LegoFigureProgram(cv.imread("TestImagesV1//Optimal//AFig1.jpg"))
+figure = LegoFigureProgram(cv.imread("TestImagesCropped//Optimal//AFig1.jpg"))
 for row in figure:
     print(row)
 cv.waitKey(0)
