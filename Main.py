@@ -18,7 +18,7 @@ def LegoFigureProgram(img):
     imgOrg = img.copy()
     # figureImg = imgOrg[]
 
-    '''yIn = img.shape[0] / 5.4
+    yIn = img.shape[0] / 5.4
     xIn = img.shape[1] / 8
 
     # convert to integers for cropping
@@ -26,8 +26,8 @@ def LegoFigureProgram(img):
     xIn = int(xIn)
 
     # figureImg = imgOrg[:yIn, :xIn]
-    figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]'''
-    figureImg = rectify(img)[0]
+    figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
+    #figureImg = rectify(img)[0]
     '''cv.namedWindow("Image", cv.WINDOW_NORMAL)
     cv.namedWindow("Org", cv.WINDOW_NORMAL)
     cv.imshow("Image", img)
