@@ -41,8 +41,8 @@ def LegoFigureProgram(img):
 
     '''cv.namedWindow("wholeBlob", cv.WINDOW_NORMAL)
     cv.imshow("wholeBlob", whole_blob)
-    cv.waitKey(0)'''
-
+    cv.waitKey(0)
+'''
     # Direction
     dominant_angle = MD.dominant_angle_from_lines(edge)
 
@@ -126,9 +126,9 @@ def LegoFigureProgram(img):
                 newBrick["color"] = predicted_color
                 newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
                 newRow.append(newBrick)
-                print(predicted_color)
+                '''print(predicted_color)
                 cv2.imshow("brick", brick)
-                cv2.waitKey(0)
+                cv2.waitKey(0)'''
             else:
                 newRow.append(None)
 
@@ -139,7 +139,7 @@ def LegoFigureProgram(img):
 
     return finalBrickMat
 
-figure = LegoFigureProgram(cv.imread("TestImagesCropped//Optimal//AFig1.jpg"))
+figure = LegoFigureProgram(cv.imread("TestImagesCropped//Optimal//AFig3.jpg"))
 for row in figure:
     print(row)
 cv.waitKey(0)

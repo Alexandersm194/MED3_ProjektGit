@@ -6,7 +6,6 @@ from PointImgCrop import rectify
 
 
 def DirecetionEval(img):
-    img = rectify(img)[0]
     yIn = int(img.shape[0] / 5.4)
     xIn = int(img.shape[1] / 8)
     figureImg = img[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
@@ -28,7 +27,7 @@ def orientation_diff(a, b):
 def angle_error(det, exp):
     return orientation_diff(det, exp)
 
-programDir = "TestImagesV1//Lighting//HardLighting"
+programDir = "TestImagesCropped//Lighting//HardLighting"
 expectedAngle = 0
 programImages = []
 figureNames = []
@@ -54,7 +53,7 @@ for i, image in enumerate(programImages):
         error = 90 - error
     gatheredError += error
 
-    print(f"In figure {figureNames[i]}, Expected: {expectedAngle}, Error: {error:.2f}")
+    print(f"{error:.2f}")
 
 averageError = gatheredError / len(programImages)
 print(f"Average Error: {averageError}")

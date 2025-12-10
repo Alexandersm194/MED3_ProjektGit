@@ -2,8 +2,8 @@ import cv2
 import Segmentation
 import os
 
-programDir = "TestImages//Direction//45 degrees"
-groundDir = "TestImages//Direction//45 degrees GT"
+programDir = "TestImagesCropped//Lighting//HardLighting"
+groundDir = "TestImagesCropped//Lighting//HardLighting GT"
 programImages = []
 groundImages = []
 figureNames = []
@@ -67,7 +67,11 @@ def IoU(programImg, groundTruthImg):
 gatheredIoU = 0
 for i, img in enumerate(programImages):
     iou = IoU(programImages[i], groundImages[i])
-    print(f"Figure {figureNames[i]}: {iou}")
+    K = 2
+
+    # using format to solve this problem
+    res = "{{:.{}f}}".format(K).format(iou)
+    print(res)
     gatheredIoU += iou
 
 averageIoU = gatheredIoU / len(programImages)

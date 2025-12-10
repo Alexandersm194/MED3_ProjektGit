@@ -20,10 +20,6 @@ V_BINS = 32
 # Convert cluster colors to HSV histogram
 # ---------------------------------------------------------
 def clusters_to_hist(clusters):
-    """
-    clusters: list of BGR tuples from DominantColorsFun
-    returns: concatenated HSV histogram
-    """
     h_hist = np.zeros(H_BINS, dtype=np.float32)
     s_hist = np.zeros(S_BINS, dtype=np.float32)
     v_hist = np.zeros(V_BINS, dtype=np.float32)

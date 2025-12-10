@@ -38,78 +38,112 @@ def sort_bricks_grid(brick_boxes, brick_images):
     return final_images, final_boxes
 def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
                  dotHeight=0, center_bias_x=0.9):
+    """
+    Detects bricks in a corrected image and returns a 2D grid of brick images.
+    Fully safe: handles empty images, zero brick sizes, and out-of-bounds indices.
+    """
 
-    hsv = cv.cvtColor(corrected_img, cv.COLOR_BGR2LAB)
-    h, s, v = cv.split(hsv)
+    # 1. Validate input images
+    if corrected_img is None or corrected_img.size == 0:
+        print("[ERROR] corrected_img is empty")
+        return []
 
-    # Increase contrast by scaling V
-    alpha = 2 # contrast factor (>1 = more contrast)
-    v = np.clip(v * alpha, 0, 255).astype(np.uint8)
+    if corrected_img_bin is None or corrected_img_bin.size == 0:
+        print("[ERROR] corrected_img_bin is empty")
+        return []
 
-    # Merge back
-    hsv_contrast = cv.merge([h, s, v])
-    edge = cv.Canny(hsv_contrast, 100, 200)
-    edge = cv.dilate(edge, np.ones((5, 5), np.uint8), iterations=2)
+    if brickWidth <= 0 or brickHeight <= 0:
+        print(f"[ERROR] Invalid brick size: width={brickWidth}, height={brickHeight}")
+        return []
 
-    bricks_mask = corrected_img_bin - edge
+    img_h, img_w = corrected_img.shape[:2]
 
+    # 2. Preprocess image
+    lab = cv.cvtColor(corrected_img, cv.COLOR_BGR2LAB)
+    l, a, b = cv.split(lab)
+    cv.namedWindow("lab", cv.WINDOW_NORMAL)
+    cv.imshow("lab", lab)
+    cv.waitKey(0)
+    alpha = 2  # contrast factor
+    l = np.clip(l * alpha, 0, 255).astype(np.uint8)
+
+    lab_contrast = cv.merge([l, a, b])
+    cv.imshow("lab", lab_contrast)
+    cv.waitKey(0)
+    edges = cv.Canny(lab_contrast, 100, 200)
+    edges = cv.dilate(edges, np.ones((5, 5), np.uint8), iterations=2)
+
+    bricks_mask = corrected_img_bin - edges
     bricks_mask = cv.morphologyEx(bricks_mask, cv.MORPH_OPEN,
                                   np.ones((40, 40), np.uint8), iterations=1)
 
-
+    # 3. Find contours
     cnts, _ = cv.findContours(bricks_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    if not cnts:
+        print("[WARN] No contours found")
+        return []
 
     brick_images = []
     brick_boxes = []
 
+    # 4. Extract valid bricks
     for cnt in cnts:
-        area = cv.contourArea(cnt)
-        if area < 2000:
+        if cv.contourArea(cnt) < 2000:
             continue
 
         x, y, w, h = cv.boundingRect(cnt)
-
         pad = 8
         x = max(0, x - pad)
         y = max(0, y - pad)
-        w = min(corrected_img.shape[1] - x, w + pad * 2)
-        h = min(corrected_img.shape[0] - y, h + pad * 2)
+        w = min(img_w - x, w + pad * 2)
+        h = min(img_h - y, h + pad * 2)
 
         crop = corrected_img[y:y + h, x:x + w].copy()
+        if crop.size == 0:
+            continue
 
         brick_images.append(crop)
         brick_boxes.append((x, y, w, h))
 
-        cv.rectangle(corrected_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv.namedWindow("Detected bricks", cv.WINDOW_NORMAL)
-    cv.imshow("Detected bricks", corrected_img)
-    cv.waitKey(0)
+    if not brick_images:
+        print("[WARN] No valid bricks after area filtering")
+        return []
 
-    # 3. Sort bricks into rows and then by X
+    # 5. Sort bricks by row then column
     sorted_images, sorted_boxes = sort_bricks_grid(brick_boxes, brick_images)
 
-    img_h, img_w = corrected_img.shape[:2]
-    nrBricksHorizontal = img_w // brickWidth
-    nrBricksVertical = (img_h - dotHeight) // brickHeight
+    nrBricksHorizontal = max(1, img_w // brickWidth)
+    nrBricksVertical = max(1, (img_h - dotHeight) // brickHeight)
 
-    # --- assign images by biased center ---
+    # Initialize empty grid
     final_grid = [[None for _ in range(nrBricksHorizontal)]
                   for _ in range(nrBricksVertical)]
 
+    # 6. Place bricks into grid safely
     for row_imgs, row_boxes in zip(sorted_images, sorted_boxes):
         for img, box in zip(row_imgs, row_boxes):
-            if box is None:
+            if img is None or box is None:
                 continue
 
             x, y, w, h = box
 
-            # Apply horizontal left-bias
+            # Compute biased center
             cx_biased = x + w * (1 - center_bias_x)
             cy_center = y + h / 2
 
-            grid_x = min(int(cx_biased // brickWidth), nrBricksHorizontal - 1)
-            grid_y = min(int((cy_center - dotHeight) // brickHeight), nrBricksVertical - 1)
+            # Compute raw grid indices
+            grid_x = int(cx_biased // brickWidth)
+            grid_y = int((cy_center - dotHeight) // brickHeight)
 
+            # Clamp indices to valid range
+            if grid_x < 0 or grid_x >= nrBricksHorizontal:
+                print(f"[SKIP] grid_x out of bounds: {grid_x}")
+                continue
+            if grid_y < 0 or grid_y >= nrBricksVertical:
+                print(f"[SKIP] grid_y out of bounds: {grid_y}")
+                continue
+
+            # Place brick safely
             final_grid[grid_y][grid_x] = img
 
     return final_grid

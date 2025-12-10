@@ -5,119 +5,153 @@ import cv2
 import numpy as np
 
 GroundTruths = getGroundTruth()
-
-
-imageDir = "TestImagesV1//Lighting//Optimal"
-images = []
-figureNames = []
-
+imageDir = "TestImagesCropped//Optimal"
+images, figureNames = [], []
 
 if os.path.isdir(imageDir):
     for file in os.listdir(imageDir):
         full_path = os.path.join(imageDir, file)
         img = cv2.imread(full_path)
         if img is None:
-            print(f"Could not load image: {full_path}")
+            print(f"[WARN] Could not load image: {full_path}")
         else:
-            print(f"Image loaded successfully: {full_path}")
             images.append(img)
             figureNames.append(file)
 
+# ----------------------------
+# PARAMETERS
+# ----------------------------
+NUM_CLASSES = 13  # 0 = empty, 1..12 = brick sizes
+TP = [0] * NUM_CLASSES
+FP = [0] * NUM_CLASSES
+FN = [0] * NUM_CLASSES
+matrix = [[0] * NUM_CLASSES for _ in range(NUM_CLASSES)]
+VerticalError, HorizontalError = [], []
+skipped_images = 0
 
-TP = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-FP = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-FN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# ---- Safe increment helpers ----
+def safe_inc(arr, idx):
+    if isinstance(idx, int) and 0 <= idx < len(arr):
+        arr[idx] += 1
+    else:
+        print(f"[WARN] Index out of range ({idx})")
 
-matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+def safe_mat_inc(gt, pr):
+    if isinstance(gt, int) and 0 <= gt < NUM_CLASSES and \
+       isinstance(pr, int) and 0 <= pr < NUM_CLASSES:
+        matrix[gt][pr] += 1
 
-VerticalError = []
-HorizontalError = []
-
+# =============================
+#     MAIN EVALUATION LOOP
+# =============================
 for i, image in enumerate(images):
     ProgramResult = Main.LegoFigureProgram(image)
     GroundTruth = GroundTruths[i]
 
-    # Store size mismatch errors
-    VerticalError.append(len(GroundTruth) - len(ProgramResult))
-    HorizontalError.append(len(GroundTruth[0]) - len(ProgramResult[0]))
+    # Check if detection failed
+    if not ProgramResult or len(ProgramResult) == 0:
+        print(f"[SKIP] Detection failed for {figureNames[i]}")
+        skipped_images += 1
+        # Count all GT bricks as false negatives (skip class 0)
+        for gt_row in GroundTruth:
+            for gt_val in gt_row:
+                if gt_val not in (None, 0):
+                    safe_inc(FN, gt_val)
+                    safe_mat_inc(gt_val, 0)
+        # Track vertical/horizontal differences
+        VerticalError.append(len(GroundTruth))
+        HorizontalError.append(len(GroundTruth[0]) if len(GroundTruth) > 0 else 0)
+        continue
 
-    for y, row in enumerate(GroundTruth):
-        for x, col in enumerate(row):
+    # Safe dimension extraction
+    gt_h = len(GroundTruth)
+    pr_h = len(ProgramResult)
+    gt_w = len(GroundTruth[0]) if gt_h > 0 else 0
+    pr_w = len(ProgramResult[0]) if pr_h > 0 else 0
+    VerticalError.append(gt_h - pr_h)
+    HorizontalError.append(gt_w - pr_w)
 
-            # ---- 1. Bounds check ----
-            if y >= len(ProgramResult) or x >= len(ProgramResult[y]):
-                # ProgramResult too small → algorithm missed a brick
-                if col is None:
-                    TP[0] += 1   # both "nothing"? ground truth = None and predicted out of bounds = None
+    # Compare each GT brick to prediction
+    for y, gt_row in enumerate(GroundTruth):
+        for x, gt_val in enumerate(gt_row):
+            pr_val = None
+            if y < pr_h and x < len(ProgramResult[y]):
+                pr_val = ProgramResult[y][x]
+
+            gt_brick, pr_brick = gt_val, pr_val
+
+            # Case 1: both None
+            if gt_brick is None and pr_brick is None:
+                safe_inc(TP, 0)
+                safe_mat_inc(0, 0)
+                continue
+
+            # Case 2: GT None, PR brick
+            if gt_brick is None and pr_brick is not None:
+                predicted = pr_brick["size"]
+                safe_inc(FP, predicted)
+                safe_mat_inc(0, predicted)
+                continue
+
+            # Case 3: GT brick, PR None
+            if gt_brick not in (None, 0) and pr_brick is None:
+                safe_inc(FN, gt_brick)
+                safe_mat_inc(gt_brick, 0)
+                continue
+
+            # Case 4: both bricks
+            if gt_brick not in (None, 0) and pr_brick is not None:
+                predicted = pr_brick["size"]
+                if predicted == gt_brick:
+                    safe_inc(TP, gt_brick)
                 else:
-                    FN[col] += 1
-                continue
+                    safe_inc(FN, gt_brick)
+                    safe_inc(FP, predicted)
+                safe_mat_inc(gt_brick, predicted)
 
-            # Safe to access now
-            brick = ProgramResult[y][x]
-            matrix[brick][col] += 1
-            # ---- 2. Normal comparison logic ----
-            if col is None and brick is None:
-                TP[0] += 1
-                continue
-
-            if col is None and brick is not None:
-                predicted_size = brick["size"]
-                FP[predicted_size] += 1
-                continue
-
-            if col is not None and brick is None:
-                FN[col] += 1
-                continue
-
-            predicted_size = brick["size"]
-
-            if col == predicted_size:
-                TP[col] += 1
-            else:
-                FN[col] += 1
-                FP[predicted_size] += 1
-
+# =============================
+#          METRICS
+# =============================
+print(f"\nSkipped images: {skipped_images} / {len(images)}")
 print(f"True Positives: {TP}")
 print(f"False Positives: {FP}")
 print(f"False Negatives: {FN}")
 
-precisions = []
-recalls = []
-f1Scores = []
+precisions, recalls, f1Scores = [], [], []
 
-for i in range(len(TP)):
-    if (TP[i] + FN[i]) == 0 or (TP[i] + FP[i]) == 0:
-        continue
-    precision = TP[i] / (TP[i] + FP[i])
+# Only include classes that are present in ground truth
+for size in range(1, NUM_CLASSES):  # skip class 0
+    if TP[size] + FN[size] == 0:
+        continue  # class not present in GT
+
+    tp, fp, fn = TP[size], FP[size], FN[size]
+
+    precision = 0 if (tp + fp) == 0 else tp / (tp + fp)
+    recall    = tp / (tp + fn)
+    f1 = 0 if (precision + recall == 0) else 2 * (precision * recall) / (precision + recall)
+
     precisions.append(precision)
-    recall = TP[i] / (TP[i] + FN[i])
     recalls.append(recall)
-    if precision + recall == 0:
-        f1Score = 0
-    else:
-        f1Score = 2 * (precision * recall) / (precision + recall)
-    f1Scores.append(f1Score)
+    f1Scores.append(f1)
 
-    print(f"Length {i}: Precision: {precision}, Recall: {recall}, F1Score: {f1Score}")
+    print(f"Class {size}: Precision={precision:.3f}, Recall={recall:.3f}, F1Score={f1:.3f}")
 
-precisions.sort()
-recalls.sort()
-f1Scores.sort()
+# Compute averages only over present classes
+avg_precision = np.mean(precisions) if precisions else 0
+avg_recall    = np.mean(recalls) if recalls else 0
+avg_f1        = np.mean(f1Scores) if f1Scores else 0
 
-print(f"Averages | Precision: {np.mean(precisions)}, Recall: {np.mean(recalls)}, F1Score: {np.mean(f1Scores)}")
+print(f"Averages | Precision: {avg_precision:.3f}, Recall: {avg_recall:.3f}, F1Score: {avg_f1:.3f}")
 
-print(VerticalError)
-print(HorizontalError)
+# =============================
+# Vertical/Horizontal Errors
+# =============================
+print("\nVertical Error:", VerticalError)
+print("Horizontal Error:", HorizontalError)
 
+# =============================
+# Confusion Matrix (including class 0)
+# =============================
+print("\nConfusion Matrix:")
 for row in matrix:
     print(row)

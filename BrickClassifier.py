@@ -4,7 +4,7 @@ import numpy as np
 def classify_brick_size(brick_img, brickHeight, brickWidth):
     brickRatios = []
 
-    for i in range(1, 9):
+    for i in range(1, 13):
         brickRatios.append(brickHeight / (brickWidth * i))
     height, width = brick_img.shape[:2]
 
@@ -12,14 +12,12 @@ def classify_brick_size(brick_img, brickHeight, brickWidth):
 
     best_match_dis = 10
     best_match = -1
-    best_match_ratio = 0
 
     for index, brick_ratio in enumerate(brickRatios):
         distance = abs(ratio - brick_ratio)
         if distance < best_match_dis:
             best_match_dis = distance
             best_match = index
-            best_match_ratio = brick_ratio
     if best_match == -1:
         return -1
     else:

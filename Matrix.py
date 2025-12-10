@@ -31,75 +31,129 @@ def removeBorderConnected(img):
 
     return im
 def find_up(crop, ref):
-    hight, width = ref.shape[:2]
-    hightVar = hight // 5
-    widthVar = width // 7
+    """
+    Detect brick orientation + compute dot height + clean height + width.
+    Guaranteed safe: no OpenCV crashes, no empty contours, no invalid kernels.
+    """
+
+    # ---------------------------
+    # 0. Validate input images
+    # ---------------------------
+    if crop is None or crop.size == 0:
+        print("[ERROR] crop image is empty")
+        return False, 0, 0, 0, False
+
+    if ref is None or ref.size == 0:
+        print("[ERROR] reference image is empty")
+        return False, 0, 0, 0, False
+
+    # ---------------------------
+    # 1. Corner extraction
+    # ---------------------------
+    h, w = ref.shape[:2]
+    hVar = max(1, h // 5)
+    wVar = max(1, w // 7)
 
     kernel = np.ones((5, 5), np.uint8)
-    ref = cv.erode(ref, kernel, iterations=1)
-    ref = cv.dilate(ref, kernel, iterations=1)
+    ref_clean = cv.erode(ref, kernel, iterations=1)
+    ref_clean = cv.dilate(ref_clean, kernel, iterations=1)
+
+    # Extract 4 corners safely
     corners = [
-        ref[0:hightVar, 0:widthVar],
-        ref[0:hightVar, (width - widthVar):width],
-        ref[(hight - hightVar):hight, 0:widthVar],
-        ref[(hight - hightVar):hight, (width - widthVar):width]
+        ref_clean[0:hVar, 0:wVar],
+        ref_clean[0:hVar, w - wVar:w],
+        ref_clean[h - hVar:h, 0:wVar],
+        ref_clean[h - hVar:h, w - wVar:w]
     ]
 
+    corrected_corners = [removeBorderConnected(c) for c in corners]
 
-
-    corrected_corners = []
-
-    for corner in corners:
-        corrected_corners.append(removeBorderConnected(corner))
-
+    # ---------------------------
+    # 2. Find biggest contour in all corners
+    # ---------------------------
     figure_cnt = None
-    biggest_cnt_area = 0
+    biggest_area = 0
     refCorner = None
 
     for crn in corrected_corners:
-        contours, _ = cv.findContours(crn, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        if crn is None or crn.size == 0:
+            continue
 
-        for i, contour in enumerate(contours):
-            area = cv.contourArea(contour)
-            if area > biggest_cnt_area:
-                figure_cnt = contour
-                biggest_cnt_area = area
+        cnts, _ = cv.findContours(crn, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+        for c in cnts:
+            area = cv.contourArea(c)
+            if area > biggest_area:
+                biggest_area = area
+                figure_cnt = c
                 refCorner = crn
 
-    cropped, LegoBrickWidth, LegoBrickHeight = Segmentation.find_bounding_box_brick(figure_cnt, refCorner)
+    # ---------------------------
+    # 3. VALIDATION: did we find a contour?
+    # ---------------------------
+    if figure_cnt is None or len(figure_cnt) == 0:
+        print("[ERROR] No corner contour found → cannot determine orientation.")
+        return False, 0, 0, 0, False
 
-    if LegoBrickWidth > LegoBrickHeight:
-        LegoBrickWidth, LegoBrickHeight = LegoBrickHeight, LegoBrickWidth
+    # ---------------------------
+    # 4. Compute bounding box brick
+    # ---------------------------
+    try:
+        cropped, bw, bh = Segmentation.find_bounding_box_brick(figure_cnt, refCorner)
+    except Exception as e:
+        print(f"[ERROR] find_bounding_box_brick failed: {e}")
+        return False, 0, 0, 0, False
 
-    LegoBrickDotHeight = math.floor(LegoBrickHeight * 0.15)
-    print(LegoBrickDotHeight)
+    # Ensure valid bounding-box brick
+    if cropped is None or cropped.size == 0:
+        print("[ERROR] Cropped brick is empty.")
+        return False, 0, 0, 0, False
 
-    LegoBrickCleanHeight = math.floor(LegoBrickHeight * 0.85)
-    print(LegoBrickCleanHeight)
-    print(LegoBrickWidth)
-    up_brick_kernel = cropped
-    down_brick_kernel = cv.rotate(up_brick_kernel, cv.ROTATE_180)
-    matchUp = cv.matchTemplate(crop, up_brick_kernel, cv.TM_CCOEFF_NORMED)
-    matchDown = cv.matchTemplate(crop, down_brick_kernel, cv.TM_CCOEFF_NORMED)
+    # Normalize width/height
+    if bw > bh:
+        bw, bh = bh, bw
 
-    # Threshold (float32 result)
+    dotHeight = int(bh * 0.15)
+    cleanHeight = int(bh * 0.85)
+
+    # ---------------------------
+    # 5. TEMPLATE MATCHING SAFETY CHECK
+    # ---------------------------
+    kh, kw = cropped.shape[:2]
+    ch, cw = crop.shape[:2]
+
+    if kh >= ch or kw >= cw:
+        print("[ERROR] Template (brick) is larger than target image → skip matching.")
+        return False, dotHeight, cleanHeight, bw, False
+
+    # Kernel for matching
+    up_kernel = cropped
+    down_kernel = cv.rotate(up_kernel, cv.ROTATE_180)
+
+    # ---------------------------
+    # 6. Template matching
+    # ---------------------------
+    try:
+        matchUp = cv.matchTemplate(crop, up_kernel, cv.TM_CCOEFF_NORMED)
+        matchDown = cv.matchTemplate(crop, down_kernel, cv.TM_CCOEFF_NORMED)
+    except Exception as e:
+        print(f"[ERROR] Template matching failed: {e}")
+        return False, dotHeight, cleanHeight, bw, False
+
+    # Threshold
     _, matchUp = cv.threshold(matchUp, 0.8, 1.0, cv.THRESH_BINARY)
     _, matchDown = cv.threshold(matchDown, 0.8, 1.0, cv.THRESH_BINARY)
 
-    # Convert to uint8 so findContours works
     matchUp = (matchUp * 255).astype(np.uint8)
     matchDown = (matchDown * 255).astype(np.uint8)
-
 
     upCnt, _ = cv.findContours(matchUp, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     downCnt, _ = cv.findContours(matchDown, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     isUp = len(upCnt) > len(downCnt)
+    isSide = len(upCnt) == len(downCnt)
 
-    isOnSide = len(upCnt) == len(downCnt)
-
-
-    return isUp, LegoBrickDotHeight, LegoBrickCleanHeight, LegoBrickWidth, isOnSide
+    return isUp, dotHeight, cleanHeight, bw, isSide
 
 
 def count_bricks_horizontal(img_width, brickWidth, tolerance=0.01):
