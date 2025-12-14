@@ -1,23 +1,7 @@
-# server_cv.py
-from flask import Flask, request, jsonify
 import cv2
-import numpy as np
 import os
-import cv2
-import cv2 as cv
-import numpy as np
-import ModelDirection as MD
-import Matrix
-import Segmentation
-import PreProcessing
-import json
-from DominantColors import DominantColorsFun
-from ColorProcessor import visualizeMatrix, connectColors
-from PointImgCrop import rectify
-from BackgroundSubtraction import remove_background
-from BrickDetector import brick_detect
-from BrickClassifier import classify_brick_hist, classify_brick_size
-from ThresholdTrainer import clusters_to_hist, train_color_histograms as trained_histograms
+from flask import Flask, request, jsonify
+from Main import LegoFigureProgram
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -33,19 +17,14 @@ def process_image():
     file.save(file_path)
 
     #img = cv2.imread(file_path)
-    img = cv.imread("TestImages/Angle/0 degrees/MFig2.jpg")
-    #img = cv.imread("TrainingImages//test.jpg")
-    #img = cv.imread("uploads//photo.jpg")
+    img = cv2.imread("TestImagesCropped//Lighting//Dark//JFig3.jpg")
+
     if img is None:
         return jsonify({"status": "error", "message": "Failed to read image"}), 400
 
-
-    #img = rectify(img)
-
-    imgOrg = img.copy()
-
-    # Pre-Processing
-    #figureImg = rectify(imgOrg)
+    finalBrickMat = LegoFigureProgram(img)
+    '''imgOrg = img.copy()
+    # figureImg = imgOrg[]
 
     yIn = img.shape[0] / 5.4
     xIn = img.shape[1] / 8
@@ -56,46 +35,71 @@ def process_image():
 
     # figureImg = imgOrg[:yIn, :xIn]
     figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn]
-
+    # figureImg = rectify(img)[0]
 
     # Background Removal
-    '''whole_blob = Segmentation.background_removal(img)[0]
-    blob = Segmentation.background_removal(figureImg)[0]'''
-
     whole_blob = remove_background(img)
     blob = remove_background(figureImg)
     edge = MD.brickEdge(figureImg)[1]
-
-
+    
     # Direction
     dominant_angle = MD.dominant_angle_from_lines(edge)
 
     # Rotate
-    rotated = MD.rotateImage(blob, dominant_angle)
+    rotated_bin = MD.rotateImage(blob, dominant_angle)
     rotated_org = MD.rotateImage(figureImg, dominant_angle)
 
-    # FindBoundingBox
-    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated)
+    # ----------------------------------------------------------
+    # 2) Initial bounding box (required for find_up)
+    # ----------------------------------------------------------
+    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
     cropped_org = rotated_org[y:y + h, x:x + w]
 
+    # ----------------------------------------------------------
+    # 3) Determine orientation from the first bounding box
+    # ----------------------------------------------------------
+    isUp, dotHeight, brickHeight, brickWidth, isOnSide = Matrix.find_up(cropped_bin, whole_blob)
+    print("isOnSide:", isOnSide)
 
-    # FindUp
-    isUp, dotHeight, brickHeight, brickWidth = Matrix.find_up(cropped_bin, whole_blob)
-    corrected_img_bin = cropped_bin
-    corrected_img = cropped_org
-    if isUp is False:
-        corrected_img_bin = MD.rotateImage(cropped_bin, 180)
-        corrected_img = MD.rotateImage(corrected_img, 180)
+    # ----------------------------------------------------------
+    # 4) If on side (90°) → rotate the FULL images and re-crop
+    # ----------------------------------------------------------
+    if isOnSide:
+        # Rotate the full original-rotated images, NOT the cropped ones
+        rotated_bin = MD.rotateImage(rotated_bin, 90)
+        rotated_org = MD.rotateImage(rotated_org, 90)
 
-    # BrickMatrix
+        # New bounding box after 90° rotation
+        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
+        cropped_org = rotated_org[y:y + h, x:x + w]
+
+        # Orientation check again from fresh crop
+        isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
+
+    # ----------------------------------------------------------
+    # 5) If upside down (180°) → rotate FULL images again and re-crop
+    # ----------------------------------------------------------
+    if not isUp:
+        rotated_bin = MD.rotateImage(rotated_bin, 180)
+        rotated_org = MD.rotateImage(rotated_org, 180)
+
+        # Fresh bounding box after 180° rotation
+        cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
+        cropped_org = rotated_org[y:y + h, x:x + w]
+
+
+    # ----------------------------------------------------------
+    # 7) Brick detection
+    # ----------------------------------------------------------
     brickWidth += int(brickHeight * 0.05)
-    bricks = brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight, dotHeight)
+    bricks = brick_detect(cropped_org, cropped_bin, brickWidth, brickHeight, dotHeight)
 
     brickDic = {
         "size": 0,
         "color": "unknown"
     }
-    tHist = trained_histograms()
+    # tHist = trained_histograms()
+    tHist = train_color_mahalanobis()
     finalBrickMat = []
     for row in bricks:
         newRow = []
@@ -106,19 +110,16 @@ def process_image():
                 if not isinstance(clusters, list):
                     clusters = [clusters]
 
-                # Convert clusters to normalized HSV histogram
                 hist = clusters_to_hist(clusters)
 
-                # Classify brick based on trained histograms
-                predicted_color = classify_brick_hist(hist, tHist)
+                predicted_color = classify_brick_mahalanobis(hist, tHist)
                 newBrick["color"] = predicted_color
-                newBrick["size"] = classify_brick_size(brick)
+                newBrick["size"] = classify_brick_size(brick, brickHeight, brickWidth)
                 newRow.append(newBrick)
             else:
                 newRow.append(None)
 
-        finalBrickMat.append(newRow)
-    print(finalBrickMat)
+        finalBrickMat.append(newRow)'''
     return jsonify(finalBrickMat)
 
 

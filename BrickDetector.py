@@ -104,6 +104,10 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
 
         brick_images.append(crop)
         brick_boxes.append((x, y, w, h))
+        cv.rectangle(corrected_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    cv.namedWindow("Detected bricks", cv.WINDOW_NORMAL)
+    cv.imshow("Detected bricks", corrected_img)
+    cv.waitKey(0)
 
     if not brick_images:
         print("[WARN] No valid bricks after area filtering")

@@ -6,31 +6,23 @@ import numpy as np
 # image = image[270:500,220:800] #cropout of fish
 # image = image[28:59,58:178] #cropout of block
 
-def DominantColorsFun(img):
-    # createBars funktion laver en bar med farverne og deres farvekoder. når scriptet er testet færdig skal den ændres til kun at returnere farvekode
-    def createBars(color):
-        red, green, blue = int(color[0]), int(color[1]), int(color[2])  # correct from bgr to rgb (except rn it's still bgr)
-        return (red, green, blue)
+def DominantColorsFun(img, clusterAmount=3, crop=0.4):
+    """
+    Returns the BGR cluster with the largest number of pixels.
+    """
+    h, w, _ = img.shape
+    img_crop = img[int(h*crop):int(h*(1-crop)), int(w*crop):int(w*(1-crop))]
+    data = img_crop.reshape(-1,3).astype(np.float32)
 
-    height, width, _ = np.shape(img)  # height and width required for calculating pixels
-    crop = 0.4
-    img = img[int(0+height*crop):int(height-height*crop), int(0+width*crop):int(width-width*crop)]
-    height, width, _ = np.shape(img)
-    data = np.reshape(img,(height * width, 3)) #get all pixel values into a list
-    data = np.float32(data) #convert to float
+    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 15, 2.0)
+    _, labels, centers = cv.kmeans(data, clusterAmount, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-    clusterAmount = 3 #amount of colors to find
-    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 15, 2.0) #maximum iterations and desired accuracy for criteria
-    flags = cv.KMEANS_RANDOM_CENTERS #KMEANS_RANDOM/PP_CENTERS
-    compactness, labels, centers = cv.kmeans(data, clusterAmount, None, criteria, 10, flags=flags)
+    centers = centers.astype(np.uint8)  # shape (K,3)
+    counts = np.bincount(labels.flatten(), minlength=clusterAmount)
+    dominant_idx = int(np.argmax(counts))
 
-    rgbValues = []
+    return np.array(centers[dominant_idx], dtype=np.uint8)  # BGR shape (3,)
 
-    for index, row in enumerate(centers):
-        rgb = createBars(row)
-        rgbValues.append(rgb)
-
-    return(min(rgbValues)) #find darkest color. takes care of highlights
 
 # #Quantize image
 # centers = np.uint8(centers)

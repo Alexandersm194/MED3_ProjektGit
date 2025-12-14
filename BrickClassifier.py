@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
+import ThresholdTrainer
 
 def classify_brick_size(brick_img, brickHeight, brickWidth):
     brickRatios = []
 
     for i in range(1, 13):
-        brickRatios.append(brickHeight / (brickWidth * i))
+        if(i % 2 == 0) or i == 1:
+            brickRatios.append(brickHeight / (brickWidth * i))
     height, width = brick_img.shape[:2]
 
     ratio = height / width
@@ -46,8 +48,10 @@ def classify_brick_hist(hist, trained_histograms, threshold=0.0):
     return predicted_color
 
 
-def classify_brick_mahalanobis(hist, trained_models, threshold=None):
-    hist = hist.astype(np.float32)
+def classify_brick_mahalanobis(feature, trained_models, threshold=None):
+    """
+    feature: precomputed 4-element feature vector (cos(h), sin(h), S, V)
+    """
     best_color = "unknown"
     best_distance = float('inf')
 
@@ -55,9 +59,8 @@ def classify_brick_mahalanobis(hist, trained_models, threshold=None):
         mean_vec = model["mean"]
         inv_cov = model["inv_cov"]
 
-        diff = hist - mean_vec
-        d = float(np.sqrt(diff.T @ inv_cov @ diff))
-
+        diff = feature - mean_vec
+        d = np.sqrt(float(diff.T @ inv_cov @ diff))
         if d < best_distance:
             best_distance = d
             best_color = color_name

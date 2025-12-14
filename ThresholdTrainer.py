@@ -2,134 +2,74 @@ import os
 import cv2
 import numpy as np
 from glob import glob
-from collections import defaultdict
-from Segmentation import background_removal, find_bounding_box
-from DominantColors import DominantColorsFun  # assumes it returns all cluster centers
+from DominantColors import DominantColorsFun
 
-# ---------------------------------------------------------
-# CONFIGURATION
-# ---------------------------------------------------------
+
 dataset_dir = "brickcolor_dataset"
-OUTPUT_FILE = "lego_color_histograms.npy"
 
-H_BINS = 30
-S_BINS = 32
-V_BINS = 32
 
 # ---------------------------------------------------------
-# Convert cluster colors to HSV histogram
+# HUE circular conversion
 # ---------------------------------------------------------
-def clusters_to_hist(clusters):
-    h_hist = np.zeros(H_BINS, dtype=np.float32)
-    s_hist = np.zeros(S_BINS, dtype=np.float32)
-    v_hist = np.zeros(V_BINS, dtype=np.float32)
 
-    for bgr in clusters:
-        pixel = np.uint8([[bgr]])
-        hsv = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)[0][0]
-
-        h_bin = int(hsv[0] / 180 * H_BINS)
-        s_bin = int(hsv[1] / 256 * S_BINS)
-        v_bin = int(hsv[2] / 256 * V_BINS)
-
-        h_bin = min(H_BINS - 1, h_bin)
-        s_bin = min(S_BINS - 1, s_bin)
-        v_bin = min(V_BINS - 1, v_bin)
-
-        h_hist[h_bin] += 1
-        s_hist[s_bin] += 1
-        v_hist[v_bin] += 1
-
-    # Normalize
-    hist = np.concatenate([h_hist, s_hist, v_hist])
-    hist /= hist.sum()
-    return hist
-
-def train_color_histograms():
-    color_histograms = {}
-
-    for color_name in os.listdir(dataset_dir):
-        color_path = os.path.join(dataset_dir, color_name)
-        if not os.path.isdir(color_path):
-            continue
-
-        print(f"Processing color: {color_name}")
-
-        all_hist = []
-
-        for img_file in glob(os.path.join(color_path, "*.jpg")) + \
-                         glob(os.path.join(color_path, "*.png")) + \
-                         glob(os.path.join(color_path, "*.jpeg")):
-
-            img = cv2.imread(img_file)
-            if img is None:
-                continue
+def hue_to_radians(h):
+    return np.deg2rad(h * 2.0)  # OpenCV hue 0–180 → 0–360° → radians
 
 
-            clusters = DominantColorsFun(img)
-            if not isinstance(clusters, list):
-                clusters = [clusters]
+# ---------------------------------------------------------
+# Convert 1 RGB cluster into HSV + circular hue feature vector
+# ---------------------------------------------------------
+def cluster_to_feature(cluster):
+    """
+    Converts BGR to HSV feature: [cos(hue), sin(hue), S_norm, V_norm]
+    """
+    cluster = np.array(cluster, dtype=np.uint8).flatten()
+    if cluster.size != 3:
+        raise ValueError(f"Expected BGR with 3 channels, got {cluster.size}")
 
-            hist = clusters_to_hist(clusters)
-            all_hist.append(hist)
+    pixel = cluster.reshape(1,1,3)
+    hsv = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)[0][0]
 
-        if all_hist:
-            mean_hist = np.mean(all_hist, axis=0)
-            color_histograms[color_name] = mean_hist
-            print(f"{color_name}: histogram computed")
+    H, S, V = hsv
+    h_rad = np.deg2rad(H*2.0)  # OpenCV H 0-180 → 0-360 degrees → radians
 
-    return color_histograms
+    return np.array([np.cos(h_rad), np.sin(h_rad), S/255.0, V/255.0], dtype=np.float32)
 
+# ---------------------------------------------------------
+# Train Mahalanobis model
+# ---------------------------------------------------------
 def train_color_mahalanobis():
     color_models = {}
-
     for color_name in os.listdir(dataset_dir):
         color_path = os.path.join(dataset_dir, color_name)
         if not os.path.isdir(color_path):
             continue
 
-        print(f"Processing color: {color_name}")
-
-        hist_list = []
-
+        features = []
         for img_file in glob(os.path.join(color_path, "*.jpg")) + \
                          glob(os.path.join(color_path, "*.png")) + \
                          glob(os.path.join(color_path, "*.jpeg")):
-
             img = cv2.imread(img_file)
             if img is None:
                 continue
 
-            clusters = DominantColorsFun(img)
-            if not isinstance(clusters, list):
-                clusters = [clusters]
+            cluster = DominantColorsFun(img)
+            feat = cluster_to_feature(cluster)
+            features.append(feat)
 
-            hist = clusters_to_hist(clusters)
-            hist_list.append(hist)
-
-        if len(hist_list) < 2:
-            print(f"Not enough samples for {color_name}, skipping.")
+        if len(features) < 2:
             continue
 
-        # Convert list to matrix (N samples × D features)
-        X = np.vstack(hist_list).astype(np.float32)
-
-        # Compute mean
+        X = np.vstack(features)
         mean_vec = np.mean(X, axis=0)
-
-        # Compute covariance (regularized to avoid singular matrices)
         cov = np.cov(X, rowvar=False)
-
-        # Regularization for numerical stability
-        cov += np.eye(cov.shape[0]) * 1e-6
-
+        cov += np.eye(X.shape[1]) * 1e-6  # regularization
         inv_cov = np.linalg.inv(cov)
 
-        color_models[color_name] = {
-            "mean": mean_vec,
-            "inv_cov": inv_cov
-        }
-
-        print(f"{color_name}: Mahalanobis model computed.")
+        color_models[color_name] = {"mean": mean_vec, "inv_cov": inv_cov}
 
     return color_models
+
+# ---------------------------------------------------------
+# Mahalanobis classifier
+# ---------------------------------------------------------

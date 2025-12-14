@@ -9,8 +9,9 @@ import json
 from DominantColors import DominantColorsFun
 from BackgroundSubtraction import remove_background
 from BrickClassifier import classify_brick_size, classify_brick_mahalanobis
-from ThresholdTrainer import clusters_to_hist, train_color_mahalanobis
+from ThresholdTrainer import cluster_to_feature, train_color_mahalanobis
 from BrickDetector import brick_detect
+from flask import jsonify
 from PointImgCrop import rectify
 
 def LegoFigureProgram(img):
@@ -116,11 +117,10 @@ def LegoFigureProgram(img):
         for brick in row:
             if (brick is not None):
                 newBrick = brickDic.copy()
-                clusters = DominantColorsFun(brick)
-                if not isinstance(clusters, list):
-                    clusters = [clusters]
 
-                hist = clusters_to_hist(clusters)
+                clusters = DominantColorsFun(brick)
+
+                hist = cluster_to_feature(clusters)
 
                 predicted_color = classify_brick_mahalanobis(hist, tHist)
                 newBrick["color"] = predicted_color
@@ -133,13 +133,14 @@ def LegoFigureProgram(img):
                 newRow.append(None)
 
         finalBrickMat.append(newRow)
-    '''json_str = json.dumps(finalBrickMat)
-            with open("sample.json", "w") as f:
-                f.write(json_str)'''
+
+    json_str = json.dumps(finalBrickMat)
+    with open("sample.json", "w") as f:
+            f.write(json_str)
 
     return finalBrickMat
 
-figure = LegoFigureProgram(cv.imread("TestImagesCropped//Optimal//AFig3.jpg"))
+figure = LegoFigureProgram(cv.imread("TestImagesCropped//Lighting//Dark//JFig3.jpg"))
 for row in figure:
     print(row)
 cv.waitKey(0)
