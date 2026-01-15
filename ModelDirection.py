@@ -6,17 +6,17 @@ def rotateImage(orgImg, angle):
     Oheight, Owidth = orgImg.shape[:2]
 
     # --- Test: rotate the image intentionally ---
-    center = (Owidth // 2, Oheight // 2)
+    center = (Owidth // 2, Oheight // 2) #find center of image
     test_rotation = angle
-    rotation_matrix = cv2.getRotationMatrix2D(center, test_rotation, 1.0)
-    rotated_image = cv2.warpAffine(orgImg, rotation_matrix, (Owidth, Oheight))
+    rotation_matrix = cv2.getRotationMatrix2D(center, test_rotation, 1.0)  #finds the rotation matrix
+    rotated_image = cv2.warpAffine(orgImg, rotation_matrix, (Owidth, Oheight))  #rotates the images with the rotationmatrix
     return rotated_image
-def opening(image, inputkernel):
+def opening(image, inputkernel): #Basic morphology opening
     erosionImg = cv2.erode(image, inputkernel, iterations=1)
     dialationImg = cv2.dilate(erosionImg, inputkernel, iterations=1)
     return dialationImg
 
-def closing(image, inputkernel):
+def closing(image, inputkernel): #Basic morphology closing
     dilationImg = cv2.dilate(image, inputkernel, iterations=1)
     erosionImg = cv2.erode(dilationImg, inputkernel, iterations=1)
     return erosionImg
@@ -25,19 +25,20 @@ def closing(image, inputkernel):
 def brickEdge(img):
     inputImg = img.copy()
 
-    gaussian_blur = cv2.GaussianBlur(inputImg, (53, 53), 0)
-    sharpened_img = cv2.addWeighted(inputImg, 1.7, gaussian_blur, -0.8, 0)
+    gaussian_blur = cv2.GaussianBlur(inputImg, (53, 53), 0)                 #Gaussian blur
+    sharpened_img = cv2.addWeighted(inputImg, 1.7, gaussian_blur, -0.8, 0)  #aplha blend original image and blurred image
 
     alpha = 3
     beta = 0
 
-
-    contrastBrightness = cv2.convertScaleAbs(sharpened_img, alpha=alpha, beta=beta)
+    contrastBrightness = cv2.convertScaleAbs(sharpened_img, alpha=alpha, beta=beta) #changing contrast (alpha) and brightness (beta)
     hsv = cv2.cvtColor(contrastBrightness, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
 
     _, s_thres = cv2.threshold(s, 100, 255, cv2.THRESH_TOZERO)
     _, v_thres = cv2.threshold(v, 50, 255, cv2.THRESH_TOZERO)
+
+    #thresholding on saturation and value, to enchance how clear the edges are (LÆS OP PÅ DET HER)
 
     hsv_edge_enhanced = cv2.merge([h, s, v_thres])
     enhanced = cv2.cvtColor(hsv_edge_enhanced, cv2.COLOR_HSV2BGR)
