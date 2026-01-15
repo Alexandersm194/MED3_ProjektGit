@@ -1,6 +1,4 @@
-import cv2
 import numpy as np
-import ThresholdTrainer
 
 def classify_brick_size(brick_img, brickHeight, brickWidth):
     brickRatios = []
@@ -28,30 +26,7 @@ def classify_brick_size(brick_img, brickHeight, brickWidth):
 
 
 
-
-def classify_brick_hist(hist, trained_histograms, threshold=0.0):
-
-    best_score = -1
-    predicted_color = "unknown"
-
-    for color_name, color_hist in trained_histograms.items():
-        score = cv2.compareHist(hist.astype(np.float32),
-                                color_hist.astype(np.float32),
-                                cv2.HISTCMP_CORREL)
-        if score > best_score:
-            best_score = score
-            predicted_color = color_name
-
-    # Check if best score is high enough
-    if best_score < threshold:
-        return "unknown"
-    return predicted_color
-
-
 def classify_brick_mahalanobis(feature, trained_models, threshold=None):
-    """
-    feature: precomputed 4-element feature vector (cos(h), sin(h), S, V)
-    """
     best_color = "unknown"
     best_distance = float('inf')
 
