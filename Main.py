@@ -19,7 +19,7 @@ def LegoFigureProgram(img):
     yIn = img.shape[0] / 5.4
     xIn = img.shape[1] / 8  #cropping the rectified img to not get the borders (instead of rectifying twice)
 
-    yIn = int(yIn)
+    yIn = int(yIn) 
     xIn = int(xIn)
 
     figureImg = imgOrg[yIn:img.shape[0] - yIn, xIn:img.shape[1] - xIn] #saving the cropped rectified img
