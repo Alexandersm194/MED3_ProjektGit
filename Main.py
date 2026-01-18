@@ -32,16 +32,17 @@ def LegoFigureProgram(img):
 
     dominant_angle = MD.dominant_angle_from_lines(edge)
 
-    rotated_bin = MD.rotateImage(blob, dominant_angle)
+    rotated_bin = MD.rotateImage(blob, dominant_angle) #Her roteres både det binære og det originale billede ud fra den vinkel vi fandt før.
     rotated_org = MD.rotateImage(figureImg, dominant_angle)
 
-    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
+    cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin) #Billedet croppes ud fra en bounding box der findes i segmentation scripts
     cropped_org = rotated_org[y:y + h, x:x + w]
 
-    brickTemp, dotHeight, brickHeight, brickLength = findReferenceBrick(whole_blob)
-    isUp, isOnSide = Matrix.find_up(cropped_bin, brickTemp)
+    brickTemp, dotHeight, brickHeight, brickLength = findReferenceBrick(whole_blob)  # finder referenceklodsen og dets mål
+    isUp, isOnSide = Matrix.find_up(cropped_bin, brickTemp) # Finder ud af hvilken vej klodsen vender
     print("isOnSide:", isOnSide)
 
+# Hvis den ligger på siden så skal den roteres den 90 grader. Så kører den isUp igen for at finde ud af om den er roteret korrekt eller om den vender på hovedet.
     if isOnSide:
         rotated_bin = MD.rotateImage(rotated_bin, 90)
         rotated_org = MD.rotateImage(rotated_org, 90)
@@ -51,6 +52,7 @@ def LegoFigureProgram(img):
 
         isUp = Matrix.find_up(cropped_bin, whole_blob)[0]
 
+# Hvis den vender på hovedet så roter den 180 grader
     if not isUp:
         rotated_bin = MD.rotateImage(rotated_bin, 180)
         rotated_org = MD.rotateImage(rotated_org, 180)
@@ -58,13 +60,19 @@ def LegoFigureProgram(img):
         cropped_bin, x, y, w, h = Segmentation.find_bounding_box(rotated_bin)
         cropped_org = rotated_org[y:y + h, x:x + w]
 
+# Det gav bedre resultater at give brickLenght (reference brick) lidt ekstra spice(længde)
     brickLength += int(brickHeight * 0.05)
+
+# her retunerers en matrix med de detekterede klodser på deres forhåbenligt korrekte startposition
     bricks = brick_detect(cropped_org, cropped_bin, brickLength, brickHeight, dotHeight)
 
+# vi laver en dictionary som indeholder informationer om brikken (størrelse og farve)
     brickDic = {
         "size": 0,
         "color": "unknown"
     }
+
+    # træning af farver ud fra de mapper vi har lavet med de individuelle farver
     # tHist = trained_histograms()
     tHist = train_color_mahalanobis()
     finalBrickMat = []

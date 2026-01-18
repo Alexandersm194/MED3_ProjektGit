@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-def rotateImage(orgImg, angle):
+def rotateImage(orgImg, angle): #en funktion der roterer ud fra en bestemt vinkel der findes længere nede i koden
     Oheight, Owidth = orgImg.shape[:2]
 
     # --- Test: rotate the image intentionally ---
@@ -22,7 +22,7 @@ def closing(image, inputkernel): #Basic morphology closing
     return erosionImg
 
 
-def brickEdge(img):
+def brickEdge(img): # Her finder vi edges med canny. Der bliver lavet små justeringer der skulle gøre det nemmere at finde edges
     inputImg = img.copy()
 
     gaussian_blur = cv2.GaussianBlur(inputImg, (53, 53), 0)                 #Gaussian blur
@@ -35,7 +35,7 @@ def brickEdge(img):
     hsv = cv2.cvtColor(contrastBrightness, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
 
-    _, s_thres = cv2.threshold(s, 100, 255, cv2.THRESH_TOZERO)
+    _, s_thres = cv2.threshold(s, 100, 255, cv2.THRESH_TOZERO) #threshold skulle muligvis gøre det nemmere at finde kanterne. Kan ikke lige huske hvorfor
     _, v_thres = cv2.threshold(v, 50, 255, cv2.THRESH_TOZERO)
 
     #thresholding on saturation and value, to enchance how clear the edges are (LÆS OP PÅ DET HER)
@@ -44,6 +44,7 @@ def brickEdge(img):
     enhanced = cv2.cvtColor(hsv_edge_enhanced, cv2.COLOR_HSV2BGR)
     edges = cv2.Canny(enhanced, 200, 255)
 
+# Herfra og ned til lineThresh er det bare for at visualisere
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 68, minLineLength=15, maxLineGap=250)
 
     for line in lines:
@@ -53,16 +54,16 @@ def brickEdge(img):
 
     bluechannel, _ , _ = cv2.split(inputImg)
     lineThresh = cv2.threshold(bluechannel, 250, 255, cv2.THRESH_BINARY)[1]
-
-    return lineThresh, edges
+# Hertil
+    return lineThresh, edges # lineThres er for ren visualisering, edges er det vi har fundet med canny
 
 
 
 def dominant_angle_from_lines(img):
     image = img.copy()
-    edges = cv2.Canny(image, 100, 200)
+    edges = cv2.Canny(image, 100, 200) #Dette er ikke nødvendigt og finder bare lidt flere edges. Kan slettes
 
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=80, minLineLength=50, maxLineGap=20)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=80, minLineLength=50, maxLineGap=20) #Den difinerer de dominante linjer, der hvor der er mange linjer efter canny
     if lines is None:
         print("No lines found.")
         return None
@@ -71,20 +72,20 @@ def dominant_angle_from_lines(img):
             x1, y1, x2, y2 = line[0]
             cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
-    angles = []
+    angles = [] # Beregner vinklerne mellem hough og en base linje (vandret) og gemmer dem i et array.
     for line in lines:
         x1, y1, x2, y2 = line[0]
         angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
         angles.append(angle)
 
-    angles = np.mod(angles, 180)
+    angles = np.mod(angles, 180) # vi kunne have fundet den dominerende vinkel ud fra den spidse vinkel i stedet??
 
-    hist, bins = np.histogram(angles, bins=180, range=(0,180))
-    dominant_angle = bins[np.argmax(hist)]
+    hist, bins = np.histogram(angles, bins=180, range=(0,180)) # Vinklerne bliver analyseret i et histogram, så vi kan se hvilke vinkler der optræder mest.
+    dominant_angle = bins[np.argmax(hist)] #Gemmer den dominerende vinkel ud fra histogrammet
 
     print(f"Detected dominant edge angle: {dominant_angle:.2f}°")
 
-    correction = dominant_angle
+    correction = dominant_angle #Gemmer den vinkel som billedet skal korrigeres med
 
     return correction
 

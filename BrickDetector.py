@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import Segmentation
-def sort_bricks_grid(brick_boxes, brick_images):
+def sort_bricks_grid(brick_boxes, brick_images): # beregner hvordan klodserne sidder i forhold til hinanden.
     boxes = np.array(brick_boxes)
 
     sort_y = np.argsort(boxes[:, 1])
@@ -10,7 +10,7 @@ def sort_bricks_grid(brick_boxes, brick_images):
 
     rows = []
     current_row = [0]
-    threshold = 20
+    threshold = 20 #definerer hvorvidt to klodser ligger på samme række. Threshold definerer hvor meget klodserne må afvige fra hinanden.
 
     for i in range(1, len(boxes)):
         if abs(boxes[i, 1] - boxes[current_row[0], 1]) < threshold:
@@ -31,9 +31,12 @@ def sort_bricks_grid(brick_boxes, brick_images):
         final_boxes.append([tuple(boxes[i]) for i in row_sorted])
 
     return final_images, final_boxes
+
+# Bruger de korrekt roterede billeder inklusiv de binære. Finder klodser i figuren og deres størrelse og putter dem ind i en matrix
 def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
                  dotHeight=0, center_bias_x=0.9):
 
+#
     if corrected_img is None or corrected_img.size == 0:
         print("[ERROR] corrected_img is empty")
         return []
@@ -46,34 +49,43 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
         print(f"[ERROR] Invalid brick size: width={brickWidth}, height={brickHeight}")
         return []
 
+# finder højde og bredden af billedet
     img_h, img_w = corrected_img.shape[:2]
 
+# konverter til LAB (edges skulle være mere clear i LAB)
     lab = cv.cvtColor(corrected_img, cv.COLOR_BGR2LAB)
     l, a, b = cv.split(lab)
 
+# øger kontrasten på L
     alpha = 2
     l = np.clip(l * alpha, 0, 255).astype(np.uint8)
 
+# Kører edge detection på billedet hvor der er blevet justeret på kontrasten på L. Dilation bliver lavet på edges for at gøre linjerne større og mere tydelige.
     edges = cv.Canny(l, 100, 200)
     edges = cv.dilate(edges, np.ones((5, 5), np.uint8), iterations=2)
 
+# Trækker edge fra den binære billede så vi står tilbage med separerede klodser(binær)
     bricks_mask = corrected_img_bin - edges
     bricks_mask = cv.morphologyEx(bricks_mask, cv.MORPH_OPEN,
                                   np.ones((40, 40), np.uint8), iterations=1)
 
+# finder constours af de individuelle brikker
     cnts, _ = cv.findContours(bricks_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     if not cnts:
         print("[WARN] No contours found")
         return []
 
+# laver arrays som indeholder brick_images (selve billedet af de enkelte brikker) og brick_boxes (informationer om hvor klodsen er i billedet inklusiv dens højde og bedde)
     brick_images = []
     brick_boxes = []
 
+# Hvis området af klodens er mindre end 2000 pixels, så spring den over. Ellers gå igennem alle contours og crop dem lidt ind
     # 4. Extract valid bricks
     for cnt in cnts:
         if cv.contourArea(cnt) < 2000:
             continue
 
+# x og y = startposition (øvre venstre hjørne). Vi laver en bounding box men udvider den lidt da vi lavede erosion og vil have det hele med.
         x, y, w, h = cv.boundingRect(cnt)
         pad = 8
         x = max(0, x - pad)
@@ -81,6 +93,7 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
         w = min(img_w - x, w + pad * 2)
         h = min(img_h - y, h + pad * 2)
 
+# cropper det ind til bounding boxen
         crop = corrected_img[y:y + h, x:x + w].copy()
         if crop.size == 0:
             continue
@@ -96,12 +109,15 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
         print("[WARN] No valid bricks after area filtering")
         return []
 
+# sort_bricks_grid sorterer klodserne og deres informationer så de passer ind i et grid. Sorted_images er en matrix med brikbillederne sorteret efter deres position
     # 5. Sort bricks by row then column
     sorted_images, sorted_boxes = sort_bricks_grid(brick_boxes, brick_images)
 
+# finder ud af hvor mange brikker der forventes at være horisontalt og vertikalt i et grid (ud fra reference brikkens størrelse og billedets størrelse)
     nrBricksHorizontal = max(1, img_w // brickWidth)
     nrBricksVertical = max(1, (img_h - dotHeight) // brickHeight)
 
+# laver et grid ud fra det overstående. Indenfor bounding box
     final_grid = [[None for _ in range(nrBricksHorizontal)]
                   for _ in range(nrBricksVertical)]
 
@@ -115,6 +131,7 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
             cx_biased = x + w * (1 - center_bias_x)
             cy_center = y + h / 2
 
+# Omdanner koordinater til hvilken gridplacering de sidder på
             grid_x = int(cx_biased // brickWidth)
             grid_y = int((cy_center - dotHeight) // brickHeight)
 
@@ -125,6 +142,7 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
                 print(f"[SKIP] grid_y out of bounds: {grid_y}")
                 continue
 
+# Den klods vi arbejder med bliver placeret i vores grid
             final_grid[grid_y][grid_x] = img
 
     return final_grid

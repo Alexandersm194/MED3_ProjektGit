@@ -31,7 +31,7 @@ def background_removal(image):
 
     return closedPic, result
 
-def crop_rotated_rect(image, rect):
+def crop_rotated_rect(image, rect): #
     # rect = ((cx, cy), (w, h), angle)
     box = cv.boxPoints(rect).astype(np.float32)
 
@@ -67,11 +67,11 @@ def crop_rotated_rect(image, rect):
 
     return warped, W, H
 
-def find_bounding_box(input):
+def find_bounding_box(input): # finder den største blob og laver bounding bow
     contours, _ = cv.findContours(input, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     result = input.copy()
 
-    figure_cnt = None
+    figure_cnt = None #finder blobben
     biggest_cnt_area = 0
     for i, contour in enumerate(contours):
         area = cv.contourArea(contour)
@@ -79,11 +79,11 @@ def find_bounding_box(input):
             figure_cnt = contour
             biggest_cnt_area = area
 
-    x, y, w, h = cv.boundingRect(figure_cnt)
+    x, y, w, h = cv.boundingRect(figure_cnt) # Finder bounding box
     cv.rectangle(result, (x, y), (x + w, y + h), (0, 0, 255), 2)
     print(f"Contours x={x}, y={y}, w={w}, h={h}")
 
-    crop = result[y:y + h, x:x + w]
+    crop = result[y:y + h, x:x + w] #cropper ind ti bounding box
 
     return crop, x, y, w, h
 
