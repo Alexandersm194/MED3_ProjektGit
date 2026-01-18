@@ -10,8 +10,8 @@ import numpy as np
 
 def rectify(image, save_debug=False):
     orig = image.copy()
-    ratio = image.shape[0] / 500.0 #changing input size to 500 pixel
-    image = imutils.resize(image, height=500)  #resizes image
+    ratio = image.shape[0] / 500.0 #changing output size to 500 pixels
+    image = imutils.resize(image, height=500)  #actual resizes image
 
     # convert to grayscale and detect edges
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -25,7 +25,7 @@ def rectify(image, save_debug=False):
 
     screenCnt = None
 
-    # Try to find a real 4-point contour
+    # Try to find a real 4-point contour (tl, tr, br, bl)
     for c in cnts[:5]:                                          #searches for something with 4 points, from largest to smallest contour found
         peri = cv.arcLength(c, True)                     #calculates contour perimeter
         approx = cv.approxPolyDP(c, 0.02 * peri, True)   #simplifies the contour, aka makes it that there is fewest points (corners) possible - 0.02 accuracy - closed true = coherent closed contour
