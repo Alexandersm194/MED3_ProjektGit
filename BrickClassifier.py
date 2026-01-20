@@ -4,8 +4,8 @@ def classify_brick_size(brick_img, brickHeight, brickWidth):
     brickRatios = []
 
     for i in range(1, 13):
-        if(i % 2 == 0) or i == 1:
-            brickRatios.append(brickHeight / (brickWidth * i))
+        #if(i % 2 == 0) or i == 1:
+        brickRatios.append(brickHeight / (brickWidth * i))
     height, width = brick_img.shape[:2]
 
     ratio = height / width

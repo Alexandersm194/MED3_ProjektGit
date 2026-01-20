@@ -20,20 +20,11 @@ def rectify(image, save_debug=False):
     edged = cv.Canny(gray, 50, 150)  # lower thresholds for robustness
 
     # find contours
-    # find contours
     cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     cnts = sorted(cnts, key=cv.contourArea, reverse=True)
 
     screenCnt = None
-
-    def force_four_points(cnt):
-        peri = cv.arcLength(cnt, True)
-        for eps in np.linspace(0.001, 0.1, 30):
-            approx = cv.approxPolyDP(cnt, eps * peri, True)
-            if len(approx) == 4:
-                return approx
-        return None
 
     # Try to find a real 4-point contour
     for c in cnts[:5]:

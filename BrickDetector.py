@@ -69,7 +69,6 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
     brick_images = []
     brick_boxes = []
 
-    # 4. Extract valid bricks
     for cnt in cnts:
         if cv.contourArea(cnt) < 2000:
             continue
@@ -88,15 +87,11 @@ def brick_detect(corrected_img, corrected_img_bin, brickWidth, brickHeight,
         brick_images.append(crop)
         brick_boxes.append((x, y, w, h))
         cv.rectangle(corrected_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv.namedWindow("Detected bricks", cv.WINDOW_NORMAL)
-    cv.imshow("Detected bricks", corrected_img)
-    cv.waitKey(0)
 
     if not brick_images:
         print("[WARN] No valid bricks after area filtering")
         return []
 
-    # 5. Sort bricks by row then column
     sorted_images, sorted_boxes = sort_bricks_grid(brick_boxes, brick_images)
 
     nrBricksHorizontal = max(1, img_w // brickWidth)

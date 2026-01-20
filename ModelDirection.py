@@ -11,15 +11,6 @@ def rotateImage(orgImg, angle):
     rotation_matrix = cv2.getRotationMatrix2D(center, test_rotation, 1.0)
     rotated_image = cv2.warpAffine(orgImg, rotation_matrix, (Owidth, Oheight))
     return rotated_image
-def opening(image, inputkernel):
-    erosionImg = cv2.erode(image, inputkernel, iterations=1)
-    dialationImg = cv2.dilate(erosionImg, inputkernel, iterations=1)
-    return dialationImg
-
-def closing(image, inputkernel):
-    dilationImg = cv2.dilate(image, inputkernel, iterations=1)
-    erosionImg = cv2.erode(dilationImg, inputkernel, iterations=1)
-    return erosionImg
 
 
 def brickEdge(img):
@@ -41,7 +32,9 @@ def brickEdge(img):
 
     hsv_edge_enhanced = cv2.merge([h, s, v_thres])
     enhanced = cv2.cvtColor(hsv_edge_enhanced, cv2.COLOR_HSV2BGR)
-    edges = cv2.Canny(enhanced, 200, 255)
+    edges = cv2.Canny(hsv_edge_enhanced, 200, 255)
+    edgesRGB = cv2.Canny(enhanced, 200, 255)
+
 
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 68, minLineLength=15, maxLineGap=250)
 
@@ -59,9 +52,7 @@ def brickEdge(img):
 
 def dominant_angle_from_lines(img):
     image = img.copy()
-    edges = cv2.Canny(image, 100, 200)
-
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=80, minLineLength=50, maxLineGap=20)
+    lines = cv2.HoughLinesP(image, 1, np.pi/180, threshold=80, minLineLength=50, maxLineGap=20)
     if lines is None:
         print("No lines found.")
         return None

@@ -13,7 +13,7 @@ from BrickTemplate import findReferenceBrick
 
 
 def LegoFigureProgram(img):
-    img = rectify(img)
+    #img = rectify(img)
     imgOrg = img.copy()
 
     yIn = img.shape[0] / 5.4
@@ -64,7 +64,7 @@ def LegoFigureProgram(img):
         "size": 0,
         "color": "unknown"
     }
-    # tHist = trained_histograms()
+
     tHist = train_color_mahalanobis()
     finalBrickMat = []
     for row in bricks:
@@ -92,9 +92,9 @@ def LegoFigureProgram(img):
 
     return finalBrickMat
 
-figure = LegoFigureProgram(cv.imread("TestImagesV2Cropped//Optimal//AFig3.jpg"))
+'''figure = LegoFigureProgram(cv.imread("TestImagesV2Cropped//Optimal//AFig3.jpg"))
 for row in figure:
     print(row)
-cv.waitKey(0)
+cv.waitKey(0)'''
 
 
